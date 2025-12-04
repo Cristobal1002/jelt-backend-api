@@ -1,5 +1,5 @@
 import express from 'express';
-import { sequelize } from '../config/database.js';
+import { sqz } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 
@@ -13,7 +13,7 @@ health.get('/', async (req, res) => {
 // Readiness probe (verifica DB)
 health.get('/ready', async (req, res) => {
   try {
-    await sequelize.authenticate();
+    await sqz.authenticate();
     res.ok({
       status: 'ready',
       database: 'connected',
