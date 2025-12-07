@@ -1,4 +1,5 @@
 import { User } from './user.model.js';
+import { Role } from './role.model.js';
 
 /**
  * Inicializa todos los modelos de Sequelize y sus relaciones
@@ -6,7 +7,11 @@ import { User } from './user.model.js';
  */
 export const initModels = (sequelize) => {
   // Inicializar modelos
+  Role.initModel(sequelize);
   User.initModel(sequelize);
+
+  // Asociaciones
+  User.associate({ Role });
 
   // Aquí podrías añadir otros modelos y relaciones en el futuro
   // ej: Company.initModel(sequelize);

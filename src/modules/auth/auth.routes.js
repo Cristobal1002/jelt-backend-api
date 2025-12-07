@@ -173,6 +173,15 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del usuario que se desea eliminar.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: "3e1b19f8-4e61-4bc1-af37-b78f7cbf5a1d"
  *     responses:
  *       200:
  *         description: Usuario eliminado correctamente.
@@ -180,6 +189,12 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthDeleteResponse'
+ *       400:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  *       401:
  *         description: Error de autorización.
  *         content:
@@ -187,7 +202,7 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
-auth.delete('/delete', authMiddleware, (req, res) =>
+auth.delete('/delete/:id', authMiddleware, (req, res) =>
   authController.delete(req, res)
 );
 
@@ -234,8 +249,56 @@ auth.delete('/delete', authMiddleware, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorNotFoundResponse'
  */
-auth.get('/find', (req, res) =>
+auth.get('/find', authMiddleware, (req, res) =>
   authController.getByEmail(req, res)
+);
+
+/**
+ * @swagger
+ * /auth/find/{id}:
+ *   get:
+ *     summary: Buscar usuario por Id
+ *     description: Obtiene un usuario por su id de registro.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del usuario que se desea buscar.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: "3e1b19f8-4e61-4bc1-af37-b78f7cbf5a1d"
+ *     responses:
+ *       200:
+ *         description: Usuario encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthFindResponse'
+ *       400:
+ *         description: Falta el parámetro id.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
+ *       404:
+ *         description: No se encontró un usuario con ese email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorNotFoundResponse'
+ */
+auth.get('/find/:id', authMiddleware, (req, res) =>
+  authController.getById(req, res)
 );
 
 

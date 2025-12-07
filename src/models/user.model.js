@@ -14,6 +14,12 @@ export class User extends Model {
         password: { type: DataTypes.STRING, allowNull: false },
         phone: { type: DataTypes.STRING, allowNull: true },
         address: { type: DataTypes.STRING, allowNull: true },
+
+        roleId: {
+          type: DataTypes.UUID,
+          allowNull: true, // luego idealmente NOT NULL con seed de roles
+        },
+
         isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
         isDelete: { type: DataTypes.BOOLEAN, defaultValue: false },
       },
@@ -24,5 +30,12 @@ export class User extends Model {
         timestamps: true,
       }
     );
+  }
+  
+  static associate(models) {
+    User.belongsTo(models.Role, {
+      as: 'role',
+      foreignKey: 'roleId',
+    });
   }
 }
