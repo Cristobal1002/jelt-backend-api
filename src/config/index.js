@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === 'production' || process.env.VALIDATE_ENV === 'true'
 
 export const config = {
   app: {
-    name: process.env.APP_NAME || 'Mordecai API',
+    name: process.env.APP_NAME || 'Custom API',
     port: Number(process.env.PORT) || 3000,
     nodeEnv: process.env.NODE_ENV || 'development',
     apiVersion: process.env.API_VERSION || 'v1',

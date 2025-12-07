@@ -4,6 +4,11 @@ import { config } from '../config/index.js';
 import { initModels } from '../models/index.js';
 
 export const loadDatabase = async () => {
+  if (!config.db.enabled) {
+    logger.warn('Database is disabled via configuration, skipping DB connection');
+    return;
+  }
+  
   try {
     logger.info('Connecting to PostgreSQL...');
     await sqz.authenticate();

@@ -46,9 +46,9 @@ const setupGracefulShutdown = () => {
 
         // Cerrar conexiones de DB solo si está habilitada
         try {
-          const { sequelize } = await import('./config/database.js');
-          if (sequelize) {
-            await sequelize.close();
+          const { sqz } = await import('./config/database.js');
+          if (sqz) {
+            await sqz.close();
             logger.info('Database connection closed');
           }
         } catch (error) {
