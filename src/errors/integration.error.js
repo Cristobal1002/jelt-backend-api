@@ -6,7 +6,7 @@ export class IntegrationError extends CustomError {
             `Error integrating with ${provider}.`,
             502,
             details,
-            `https://mordcai.com/errors/integration/${provider.toLowerCase()}`
+            `https://jelt.com/errors/integration/${provider.toLowerCase()}`
         );
     }
 }
