@@ -56,7 +56,7 @@ export const auth = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthRegisterResponse'
  *       400:
  *         description: Error de validación o email ya registrado.
  *         content:
@@ -127,7 +127,14 @@ auth.post('/login', loginValidator, (req, res) =>
  *           schema:
  *             type: object
  *             properties:
+ *               id:
+ *                 format: 'uuid'
  *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
  *                 type: string
  *               phone:
  *                 type: string
@@ -139,11 +146,7 @@ auth.post('/login', loginValidator, (req, res) =>
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Usuario actualizado
+ *               $ref: '#/components/schemas/AuthUpdateResponse'
  *       400:
  *         description: Error de validación.
  *         content:
@@ -152,6 +155,10 @@ auth.post('/login', loginValidator, (req, res) =>
  *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: Token inválido o no enviado.
+  *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
 auth.put('/update', authMiddleware, updateValidator, (req, res) =>
   authController.update(req, res)
@@ -172,13 +179,13 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Usuario eliminado
+ *               $ref: '#/components/schemas/AuthDeleteResponse'
  *       401:
- *         description: Token inválido o no enviado.
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
 auth.delete('/delete', authMiddleware, (req, res) =>
   authController.delete(req, res)
@@ -191,6 +198,8 @@ auth.delete('/delete', authMiddleware, (req, res) =>
  *     summary: Buscar usuario por email
  *     description: Obtiene un usuario por su dirección de email.
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: email
@@ -205,20 +214,32 @@ auth.delete('/delete', authMiddleware, (req, res) =>
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthFindResponse'
  *       400:
  *         description: Falta el parámetro email.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  *       404:
  *         description: No se encontró un usuario con ese email.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ErrorNotFoundResponse'
  */
 auth.get('/find', (req, res) =>
   authController.getByEmail(req, res)
+);
+
+
+// VALIDAR token Bearer y obtener info del usuario del token
+auth.get('/validate-token', authMiddleware, (req, res) =>
+  authController.validateToken(req, res)
 );

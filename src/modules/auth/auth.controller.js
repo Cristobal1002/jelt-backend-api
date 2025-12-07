@@ -5,40 +5,44 @@ class AuthController {
   async register(req, res) {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).json(errors);
+      if (!errors.isEmpty()) return res.badRequest(errors);
 
       const user = await authService.register(req.body);
-      return res.status(201).json(user);
+
+      return res.created(user);
+
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.badRequest(err.message);
     }
   }
 
   async login(req, res) {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).json(errors);
+      if (!errors.isEmpty()) return res.badRequest(errors);
 
       const { email, password } = req.body;
-      const result = await authService.login(email, password);
+      const { user, token } = await authService.login(email, password);
 
-      return res.json(result);
+      return res.ok({user, token});
+
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.badRequest(err.message);
     }
   }
 
   async update(req, res) {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).json(errors);
+      if (!errors.isEmpty()) return res.badRequest(errors);
 
       const id = req.user.id;
       const msg = await authService.updateUser(id, req.body);
 
-      return res.json(msg);
+      return res.ok(msg);
+
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.badRequest(err.message);
     }
   }
 
@@ -46,21 +50,41 @@ class AuthController {
     try {
       const id = req.user.id;
       const msg = await authService.deleteUser(id);
-      return res.json(msg);
+
+      return res.ok(msg);
+
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.badRequest(err.message);
     }
   }
 
   async getByEmail(req, res) {
     try {
       const { email } = req.query;
-      const msg = await authService.getUserByEmail(email);
-      return res.json(msg);
+      const msg = await authService.getUserByEmail(email);      
+
+      return res.ok(msg);
+
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.notFound(err.message);
+    }
+  }
+
+   async validateToken(req, res) {
+    try {
+      if (!req.user) {
+        return res.unauthorized('Token inválido o no proporcionado');
+      }
+
+      return res.ok({
+        user: req.user,
+      }, 
+      'Token válido');
+    } catch (err) {
+      return res.badRequest(err.message);
     }
   }
 }
+
 
 export const authController = new AuthController();

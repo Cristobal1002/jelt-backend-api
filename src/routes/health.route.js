@@ -2,6 +2,7 @@ import express from 'express';
 import { sqz } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
+import { responseHandler } from '../middlewares/response-handler.middleware.js';
 
 export const health = express.Router();
 
