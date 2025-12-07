@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
-import { routes } from '../routes/index.js';
+import routes from '../routes/index.js';
 import { responseHandler } from '../middlewares/index.js';
 import { errorHandlerMiddleware } from '../middlewares/index.js';
 import { swaggerOptions } from '../config/swagger.js';
@@ -77,9 +77,12 @@ export const loadExpress = (app) => {
   // Routes
   routes(app);
 
-  // 404 handler
-  app.use((req, res) => {
-    res.notFound('Route not found');
+  // 404
+  app.use((req, res, next) => {
+    if (!res.headersSent) {
+      return res.notFound('Route not found');
+    }
+    next();
   });
 
   // Error handler (debe ir al final)

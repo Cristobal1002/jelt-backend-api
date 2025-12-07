@@ -15,6 +15,6 @@ export const handleServiceError = (error) => {
     message,
     status,
     details,
-    'https://mordcai.com/docs/errors/service-error'
+    'https://jelt.com/docs/errors/service-error'
   );
 };

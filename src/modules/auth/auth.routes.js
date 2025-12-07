@@ -1,13 +1,14 @@
-import express from 'express';
+import { Router } from 'express';
 import { authController } from './auth.controller.js';
-import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import {
   registerValidator,
   loginValidator,
   updateValidator,
 } from './auth.validator.js';
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { validateRequest  } from '../../middlewares/validate-request.middleware.js';
 
-export const auth = express.Router();
+const router = Router();
 
 /**
  * @swagger
@@ -64,8 +65,11 @@ export const auth = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-auth.post('/register', registerValidator, (req, res) =>
-  authController.register(req, res)
+router.post(
+  '/register',
+  registerValidator,           // reglas de express-validator
+  validateRequest,   // lanza RequestValidationError si hay errores
+  authController.register
 );
 
 /**
@@ -107,8 +111,11 @@ auth.post('/register', registerValidator, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-auth.post('/login', loginValidator, (req, res) =>
-  authController.login(req, res)
+router.post(
+  '/login',
+  loginValidator,
+  validateRequest,
+  authController.login
 );
 
 /**
@@ -160,8 +167,12 @@ auth.post('/login', loginValidator, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
-auth.put('/update', authMiddleware, updateValidator, (req, res) =>
-  authController.update(req, res)
+router.put(
+  '/update',
+  authMiddleware,              // requiere JWT
+  updateValidator,
+  validateRequest,
+  authController.update
 );
 
 /**
@@ -202,8 +213,10 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
-auth.delete('/delete/:id', authMiddleware, (req, res) =>
-  authController.delete(req, res)
+router.delete(
+  '/delete/:id',
+  authMiddleware,
+  authController.delete
 );
 
 /**
@@ -249,8 +262,10 @@ auth.delete('/delete/:id', authMiddleware, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorNotFoundResponse'
  */
-auth.get('/find', authMiddleware, (req, res) =>
-  authController.getByEmail(req, res)
+router.get(
+  '/find',
+  authMiddleware,
+  authController.getByEmail
 );
 
 /**
@@ -297,12 +312,18 @@ auth.get('/find', authMiddleware, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorNotFoundResponse'
  */
-auth.get('/find/:id', authMiddleware, (req, res) =>
-  authController.getById(req, res)
+router.get(
+  '/find/:id',
+  authMiddleware,
+  authController.getById
 );
 
 
 // VALIDAR token Bearer y obtener info del usuario del token
-auth.get('/validate-token', authMiddleware, (req, res) =>
-  authController.validateToken(req, res)
+router.get(
+  '/validate-token',
+  authMiddleware,
+  authController.validateToken
 );
+
+export default router;

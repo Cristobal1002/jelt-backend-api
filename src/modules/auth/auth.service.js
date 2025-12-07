@@ -1,151 +1,141 @@
 import { authRepository } from './auth.repository.js';
 import { hashPassword, comparePassword } from '../../utils/crypto.js';
 import { generateToken } from '../../utils/jwt.js';
-import { Role } from '../../models/role.model.js';
-
+import {
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../errors/http.error.js';
 const DEFAULT_ROLE = 'USER';
 
-class AuthService {
-  async register(data) {
-    const exists = await authRepository.findByEmail(data.email);
-    if (exists) throw new Error('Email ya registrado');
+const register = async (data) => {
+  const { email, password, name } = data;
 
-    const hashed = await hashPassword(data.password);
-
-    // buscar rol USER
-    const role = await Role.findOne({ where: { name: DEFAULT_ROLE } });
-    if (!role) {
-      throw new Error(
-        `Rol por defecto ${DEFAULT_ROLE} no encontrado. Crea primero los roles base.`
-      );
-    }
-
-    const user = await authRepository.createUser({
-      ...data,
-      password: hashed,
-      roleId: role.id,
-    });
-
-    return user;
+  const existing = await authRepository.findByEmail(email);
+  if (existing) {
+    throw new BadRequestError('Email is already registered');
   }
 
-  async login(email, password) {
-    const user = await authRepository.findByEmail(email);
-    if (!user) throw new Error('Credenciales inválidas');
+  const hashedPassword = await hashPassword(password);
 
-    if (!user.isActive || user.isDelete) {
-      throw new Error('Usuario inactivo o eliminado');
-    }
+  const user = await authRepository.createUser({
+    ...data,
+    password: hashedPassword,
+    roleName: DEFAULT_ROLE,
+  });
 
-    const isValid = await comparePassword(password, user.password);
-    if (!isValid) throw new Error('Credenciales inválidas');
+  delete user.dataValues.password;
 
-    const token = generateToken({ id: user.id, email: user.email, role: user.role?.name || DEFAULT_ROLE, });
+  return user;
+};
 
-    return { user, token };
+const login = async ({ email, password }) => {
+  const user = await authRepository.findByEmail(email);
+
+  if (!user) {
+    throw new UnauthorizedError('Invalid credentials');
   }
 
-  /**
-   * Actualizar datos del propio usuario autenticado
-   * - Solo puede modificar su propio registro
-   * - No puede cambiar roleId, isActive, isDelete, id
-   */
-  async updateOwnUser(userId, data, currentUser) {
-    if (!currentUser || currentUser.id !== userId) {
-      throw new Error('No puedes modificar otro usuario');
-    }
-
-    if(data.password && data.password.length > 0) {
-      data.password = await hashPassword(data.password);
-    } else {
-      delete data.password;
-    }
-
-    // Campos que NO permitimos que toque el usuario
-    const { id, roleId, isActive, isDelete, ...safeData } = data;
-
-    await authRepository.updateUser(userId, safeData);
-
-    return { message: 'Usuario actualizado correctamente' };
+  if (!user.isActive) {
+    throw new ForbiddenError('User is inactive');
   }
 
-  async updateUser(id, data) {
-    await authRepository.updateUser(id, data);
-    return { message: 'Usuario actualizado' };
+  if (user.isDelete) {
+    throw new ForbiddenError('User is deleted');
   }
 
-  /**
-  * Eliminar (soft delete) un usuario
-  * Reglas:
-  * - Nadie puede eliminarse a sí mismo
-  * - Un usuario con rol ADMIN no puede eliminar a nadie
-  * - Solo SUPER_ADMIN puede eliminar usuarios, y nunca a sí mismo
-  */
-  async deleteUser(targetUserId, currentUser) {
-    if (!currentUser) {
-      throw new Error('Usuario no autenticado');
-    }
-
-    const { id: authId, role } = currentUser;
-
-    if (authId === targetUserId) {
-      throw new Error('No puedes eliminar tu propio usuario');
-    }
-
-    if (role === 'ADMIN') {
-      throw new Error(
-        'No puedes eliminar o inhabilitar usuarios'
-      );
-    }
-
-    if (role !== 'SUPER_ADMIN') {
-      throw new Error(
-        'No tienes permisos para eliminar o inhabilitar usuarios'
-      );
-    }
-
-    const targetUser = await authRepository.findById(targetUserId);
-
-    if (!targetUser) {
-      throw new Error('Usuario a eliminar no encontrado');
-    }
-
-    await authRepository.softDelete(targetUserId);
-    return { message: 'Usuario eliminado (soft delete) correctamente' };
+  const isValidPassword = await comparePassword(password, user.password);
+  if (!isValidPassword) {
+    throw new UnauthorizedError('Invalid credentials');
   }
 
-  async findByEmail(targetEmail, currentUser) {
+  const token = generateToken({
+    id: user.id,
+    email: user.email,
+    role: user.role?.name,
+  });
 
-    const { email, role } = currentUser;
+  delete user.dataValues.password;
 
-    if ((role == undefined || role == null || role == DEFAULT_ROLE) && email !== targetEmail) {
-      throw new Error('No puedes consultar este usuario');
-    }
+  return { token, user };
+};
 
-    const user = await authRepository.findByEmail(targetEmail);
-
-    if (!user) throw new Error('Usuario no encontrado');
-
-    return user;
+const updateOwnUser = async (userId, data, currentUser) => {
+  if (currentUser.id !== Number(userId)) {
+    throw new ForbiddenError('You can only update your own account');
   }
 
-  async findById(targetId, currentUser) {
+  // Nunca permitimos modificar estos campos directamente
+  const fieldsToStrip = ['id', 'roleId', 'isActive', 'isDelete'];
+  fieldsToStrip.forEach((f) => delete data[f]);
 
-    const { id, role } = currentUser;
-
-    console.log("id", id, "targetId", targetId);
-
-    if ((role == undefined || role == null || role == DEFAULT_ROLE) && id !== targetId) {
-      throw new Error('No puedes consultar este usuario');
-    }
-
-    const user = await authRepository.findById(targetId);
-
-    if (!user) throw new Error('Usuario no encontrado');
-
-    return user;
+  // Si viene password, hash; si no, la quitamos
+  if (data.password) {
+    data.password = await hashPassword(data.password);
+  } else {
+    delete data.password;
   }
 
-}
+  const updated = await authRepository.updateUser(userId, data);
+  if (!updated) {
+    throw new NotFoundError('User not found');
+  }
 
-export const authService = new AuthService();
+  delete updated.dataValues.password;
+  return updated;
+};
+
+const deleteUser = async (id, currentUser) => {
+  
+  if (currentUser.role?.name !== 'ADMIN') {
+    throw new ForbiddenError('You are not allowed to delete users');
+  }
+
+  const deleted = await authRepository.softDelete(id);
+  if (!deleted) {
+    throw new NotFoundError('User not found');
+  }
+};
+
+const findByEmail = async (email, currentUser) => {
+  if (!email) {
+    throw new BadRequestError('Email is required');
+  }
+
+  // Si el rol es USER, solo puede verse a sí mismo
+  if (currentUser.role?.name === 'USER' && currentUser.email !== email) {
+    throw new ForbiddenError('You are not allowed to view other users');
+  }
+
+  const user = await authRepository.findByEmail(email);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  delete user.dataValues.password;
+  return user;
+};
+
+const findById = async (id, currentUser) => {
+  const user = await authRepository.findById(id);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  if (currentUser.role?.name === 'USER' && currentUser.id !== Number(id)) {
+    throw new ForbiddenError('You are not allowed to view other users');
+  }
+
+  delete user.dataValues.password;
+  return user;
+};
+
+export const authService = {
+  register,
+  login,
+  updateOwnUser,
+  deleteUser,
+  findByEmail,
+  findById,
+};
