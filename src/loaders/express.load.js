@@ -2,11 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { routes } from '../routes/index.js';
 import { responseHandler } from '../middlewares/index.js';
 import { errorHandlerMiddleware } from '../middlewares/index.js';
+import { swaggerOptions } from '../config/swagger.js';
 
 export const loadExpress = (app) => {
   // Security headers
@@ -25,6 +28,22 @@ export const loadExpress = (app) => {
   // Body parsers
   app.use(express.json({ limit: '20mb' }));
   app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+  // Middleware de respuestas custom
+  app.use(responseHandler);
+
+  // Swagger (UI + JSON)
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+  app.use(
+    `/api/${config.app.apiVersion}/docs`,
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+  );
+
+  app.get(`/api/${config.app.apiVersion}/docs.json`, (req, res) => {
+    res.json(swaggerSpec);
+  });
 
   // Rate limiting
   const limiter = rateLimit({
