@@ -50,7 +50,9 @@ npm start
 │   ├── middlewares/     # Middlewares personalizados
 │   ├── models/          # Modelos de Sequelize
 │   ├── routes/          # Definición de rutas
-│   ├── services/        # Lógica de negocio
+│   ├── modules/         
+│   │    └── auth/        # Implementacion Autenticación, Login y Registro
+│   ├── services/        # Lógica de negocio (****)
 │   ├── utils/           # Utilidades (logger, helpers)
 │   └── server.js        # Configuración del servidor
 ├── app.js               # Punto de entrada
@@ -84,6 +86,10 @@ El proyecto usa Sequelize como ORM. Configura las variables de entorno de base d
 - `GET /api/v1/health` - Health check básico
 - `GET /api/v1/health/ready` - Readiness probe (verifica DB)
 - `GET /api/v1/health/live` - Liveness probe
+
+### Documentación
+
+- `/api/v1/docs` - Swagger UI
 
 ## 🧪 Testing
 
