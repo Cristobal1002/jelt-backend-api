@@ -4,7 +4,6 @@ Raíz:
 
 * `app.js`
 * `src/`
-
   * `server.js`
   * `config/`
   * `loaders/`
@@ -12,8 +11,11 @@ Raíz:
   * `middlewares/`
   * `routes/`
   * `modules/`
-
+    * `article/`
     * `auth/`
+    * `category/`
+    * `stockroom/`
+    * `supplier/`
   * `models/`
   * `utils/`
   * `db.sql/`
