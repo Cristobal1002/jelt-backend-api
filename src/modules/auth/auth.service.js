@@ -12,6 +12,9 @@ const DEFAULT_ROLE = 'USER';
 const register = async (data) => {
   const { email, password, name } = data;
 
+console.log("******************************************");
+  console.log(data);
+
   const existing = await authRepository.findByEmail(email);
   if (existing) {
     throw new BadRequestError('Email is already registered');
@@ -67,7 +70,7 @@ const updateOwnUser = async (userId, data, currentUser) => {
   }
 
   // Nunca permitimos modificar estos campos directamente
-  const fieldsToStrip = ['id', 'roleId', 'isActive', 'isDelete'];
+  const fieldsToStrip = ['id', 'id_rol', 'isActive', 'isDelete'];
   fieldsToStrip.forEach((f) => delete data[f]);
 
   // Si viene password, hash; si no, la quitamos

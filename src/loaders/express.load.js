@@ -33,12 +33,28 @@ export const loadExpress = (app) => {
   app.use(responseHandler);
 
   // Swagger (UI + JSON)
+  const swaggerCustomCss = `
+  .swagger-ui .opblock-tag small {
+    display: block !important;
+    margin-top: 4px !important;
+  }
+  .swagger-ui .opblock-tag a {
+    display: block !important;
+  }
+  .swagger-ui .opblock-tag {
+    display: block !important;
+  }
+  `;
+
   const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
   app.use(
     `/api/${config.app.apiVersion}/docs`,
     swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec)
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customCss: swaggerCustomCss,
+    })
   );
 
   app.get(`/api/${config.app.apiVersion}/docs.json`, (req, res) => {

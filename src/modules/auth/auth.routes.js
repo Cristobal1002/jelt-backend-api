@@ -14,7 +14,15 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Auth
- *   description: Endpoints de autenticación y gestión de usuario
+ *   description: >
+ *      El módulo **Auth** gestiona todo lo relacionado con la autenticación y autorización de usuarios.
+ *      Este módulo garantiza que solo usuarios autenticados y con los permisos adecuados puedan acceder a los recursos protegidos de la API.
+ *      <br/>Permite:
+ *      <ul><li>Registrar nuevos usuarios en el sistema.</li>
+ *      <li>Iniciar sesión (login) con email y contraseña.</li>
+ *      <li>Generar y validar tokens JWT para proteger los endpoints.</li>
+ *      <li>Asociar cada usuario a un rol (por ejemplo: **USER**, **ADMIN**, **SUPER_ADMIN**).</li>
+ *      <li>Exponer datos básicos del usuario autenticado (como me o información de perfil, según el proyecto).</li>
  */
 
 

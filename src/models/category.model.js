@@ -1,19 +1,17 @@
 import { DataTypes, Model } from 'sequelize';
 
-export class Role extends Model {
+export class Category extends Model {
   static initModel(sequelize) {
-    Role.init(
+    Category.init(
       {
         id: {
           type: DataTypes.UUID,
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
-          field: 'id'
         },
         name: {
           type: DataTypes.STRING,
           allowNull: false,
-          unique: true,          // USER, ADMIN, SUPER_ADMIN
         },
         description: {
           type: DataTypes.STRING,
@@ -26,17 +24,17 @@ export class Role extends Model {
       },
       {
         sequelize,
-        modelName: 'Role',
-        tableName: 'roles',
+        modelName: 'Category',
+        tableName: 'categories',
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Role.hasMany(models.User, {
-      as: 'users',
-      foreignKey: 'id_rol',
+    Category.hasMany(models.Article, {
+      as: 'articles',
+      foreignKey: 'id_category',
     });
   }
 }

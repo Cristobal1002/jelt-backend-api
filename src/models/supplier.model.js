@@ -1,21 +1,28 @@
 import { DataTypes, Model } from 'sequelize';
 
-export class Role extends Model {
+export class Supplier extends Model {
   static initModel(sequelize) {
-    Role.init(
+    Supplier.init(
       {
         id: {
           type: DataTypes.UUID,
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
-          field: 'id'
         },
         name: {
           type: DataTypes.STRING,
           allowNull: false,
-          unique: true,          // USER, ADMIN, SUPER_ADMIN
         },
-        description: {
+        nit: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        address: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        phone: {
           type: DataTypes.STRING,
           allowNull: true,
         },
@@ -26,17 +33,17 @@ export class Role extends Model {
       },
       {
         sequelize,
-        modelName: 'Role',
-        tableName: 'roles',
+        modelName: 'Supplier',
+        tableName: 'suppliers',
         timestamps: true,
       }
     );
   }
 
   static associate(models) {
-    Role.hasMany(models.User, {
-      as: 'users',
-      foreignKey: 'id_rol',
+    Supplier.hasMany(models.Article, {
+      as: 'articles',
+      foreignKey: 'id_supplier',
     });
   }
 }
