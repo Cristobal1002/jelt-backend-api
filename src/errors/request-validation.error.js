@@ -6,7 +6,7 @@ export class RequestValidationError extends CustomError {
             "Validation error",
             400,
             errors,
-            "https://mordcai.com/docs/errors/validation-error"
+            "https://jelt.com/docs/errors/validation-error"
         );
 
         this.errors = errors;

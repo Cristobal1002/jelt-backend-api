@@ -2,7 +2,21 @@ import { User } from '../../models/user.model.js';
 
 class AuthRepository {
   async findByEmail(email) {
-    return User.findOne({ where: { email, isDelete: false } });
+    return User.findOne({ 
+      where: { email, isDelete: false },
+      include: [{
+        association: 'role',
+      }],
+    });
+  }
+
+  async findById(id) {
+    return User.findOne({
+      where: { id, isDelete: false },
+      include: [{
+        association: 'role',
+      }],
+    });
   }
 
   async createUser(data) {

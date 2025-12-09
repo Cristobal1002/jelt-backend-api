@@ -9,11 +9,16 @@ export class User extends Model {
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
         },
+        id_rol: {
+          type: DataTypes.UUID,
+          allowNull: true,
+        },
         name: { type: DataTypes.STRING, allowNull: false },
         email: { type: DataTypes.STRING, allowNull: false, unique: true },
         password: { type: DataTypes.STRING, allowNull: false },
         phone: { type: DataTypes.STRING, allowNull: true },
         address: { type: DataTypes.STRING, allowNull: true },
+
         isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
         isDelete: { type: DataTypes.BOOLEAN, defaultValue: false },
       },
@@ -24,5 +29,12 @@ export class User extends Model {
         timestamps: true,
       }
     );
+  }
+  
+  static associate(models) {
+    User.belongsTo(models.Role, {
+      as: 'role',
+      foreignKey: 'id_rol',
+    });
   }
 }

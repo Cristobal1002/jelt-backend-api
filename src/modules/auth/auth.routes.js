@@ -1,19 +1,28 @@
-import express from 'express';
+import { Router } from 'express';
 import { authController } from './auth.controller.js';
-import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import {
   registerValidator,
   loginValidator,
   updateValidator,
 } from './auth.validator.js';
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { validateRequest  } from '../../middlewares/validate-request.middleware.js';
 
-export const auth = express.Router();
+const router = Router();
 
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: Endpoints de autenticación y gestión de usuario
+ *   description: >
+ *      El módulo **Auth** gestiona todo lo relacionado con la autenticación y autorización de usuarios.
+ *      Este módulo garantiza que solo usuarios autenticados y con los permisos adecuados puedan acceder a los recursos protegidos de la API.
+ *      <br/>Permite:
+ *      <ul><li>Registrar nuevos usuarios en el sistema.</li>
+ *      <li>Iniciar sesión (login) con email y contraseña.</li>
+ *      <li>Generar y validar tokens JWT para proteger los endpoints.</li>
+ *      <li>Asociar cada usuario a un rol (por ejemplo: **USER**, **ADMIN**, **SUPER_ADMIN**).</li>
+ *      <li>Exponer datos básicos del usuario autenticado (como me o información de perfil, según el proyecto).</li>
  */
 
 
@@ -56,7 +65,7 @@ export const auth = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthRegisterResponse'
  *       400:
  *         description: Error de validación o email ya registrado.
  *         content:
@@ -64,8 +73,11 @@ export const auth = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-auth.post('/register', registerValidator, (req, res) =>
-  authController.register(req, res)
+router.post(
+  '/register',
+  registerValidator,           // reglas de express-validator
+  validateRequest,   // lanza RequestValidationError si hay errores
+  authController.register
 );
 
 /**
@@ -107,8 +119,11 @@ auth.post('/register', registerValidator, (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-auth.post('/login', loginValidator, (req, res) =>
-  authController.login(req, res)
+router.post(
+  '/login',
+  loginValidator,
+  validateRequest,
+  authController.login
 );
 
 /**
@@ -127,7 +142,14 @@ auth.post('/login', loginValidator, (req, res) =>
  *           schema:
  *             type: object
  *             properties:
+ *               id:
+ *                 format: 'uuid'
  *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
  *                 type: string
  *               phone:
  *                 type: string
@@ -139,11 +161,7 @@ auth.post('/login', loginValidator, (req, res) =>
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Usuario actualizado
+ *               $ref: '#/components/schemas/AuthUpdateResponse'
  *       400:
  *         description: Error de validación.
  *         content:
@@ -152,9 +170,17 @@ auth.post('/login', loginValidator, (req, res) =>
  *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: Token inválido o no enviado.
+  *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
-auth.put('/update', authMiddleware, updateValidator, (req, res) =>
-  authController.update(req, res)
+router.put(
+  '/update',
+  authMiddleware,              // requiere JWT
+  updateValidator,
+  validateRequest,
+  authController.update
 );
 
 /**
@@ -166,22 +192,39 @@ auth.put('/update', authMiddleware, updateValidator, (req, res) =>
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del usuario que se desea eliminar.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: "3e1b19f8-4e61-4bc1-af37-b78f7cbf5a1d"
  *     responses:
  *       200:
  *         description: Usuario eliminado correctamente.
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Usuario eliminado
+ *               $ref: '#/components/schemas/AuthDeleteResponse'
+ *       400:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  *       401:
- *         description: Token inválido o no enviado.
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  */
-auth.delete('/delete', authMiddleware, (req, res) =>
-  authController.delete(req, res)
+router.delete(
+  '/delete/:id',
+  authMiddleware,
+  authController.delete
 );
 
 /**
@@ -191,6 +234,8 @@ auth.delete('/delete', authMiddleware, (req, res) =>
  *     summary: Buscar usuario por email
  *     description: Obtiene un usuario por su dirección de email.
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: email
@@ -205,20 +250,88 @@ auth.delete('/delete', authMiddleware, (req, res) =>
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthFindResponse'
  *       400:
  *         description: Falta el parámetro email.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
  *       404:
  *         description: No se encontró un usuario con ese email.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/ErrorNotFoundResponse'
  */
-auth.get('/find', (req, res) =>
-  authController.getByEmail(req, res)
+router.get(
+  '/find',
+  authMiddleware,
+  authController.getByEmail
 );
+
+/**
+ * @swagger
+ * /auth/find/{id}:
+ *   get:
+ *     summary: Buscar usuario por Id
+ *     description: Obtiene un usuario por su id de registro.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del usuario que se desea buscar.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: "3e1b19f8-4e61-4bc1-af37-b78f7cbf5a1d"
+ *     responses:
+ *       200:
+ *         description: Usuario encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthFindResponse'
+ *       400:
+ *         description: Falta el parámetro id.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Error de autorización.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
+ *       404:
+ *         description: No se encontró un usuario con ese email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorNotFoundResponse'
+ */
+router.get(
+  '/find/:id',
+  authMiddleware,
+  authController.getById
+);
+
+
+// VALIDAR token Bearer y obtener info del usuario del token
+router.get(
+  '/validate-token',
+  authMiddleware,
+  authController.validateToken
+);
+
+export default router;

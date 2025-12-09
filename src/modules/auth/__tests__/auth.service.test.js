@@ -1,28 +1,52 @@
-const authService = require("../auth.service");
-const authRepository = require("../auth.repository");
-const { hashPassword, comparePassword } = require("../../../utils/crypto");
+import { jest } from '@jest/globals';
+import { authService } from '../auth.service.js';
+import { authRepository } from '../auth.repository.js';
+import { BadRequestError } from '../../../errors/http.error.js';
 
-jest.mock("../auth.repository");
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
-describe("AuthService", () => {
-  test("register debe crear un usuario nuevo", async () => {
-    authRepository.findByEmail.mockResolvedValue(null);
-    authRepository.createUser.mockResolvedValue({ id: 1, email: "test@mail.com" });
+describe('AuthService - register', () => {
+  test('lanza BadRequestError si el email ya existe', async () => {
+    const data = { email: 'test@example.com', password: '123456', name: 'Test' };
 
-    const user = await authService.register({
-      email: "test@mail.com",
-      password: "123456",
-      name: "User Test"
-    });
+    const findByEmailMock = jest
+      .spyOn(authRepository, 'findByEmail')
+      .mockResolvedValue({ id: 1, email: data.email });
 
-    expect(user.email).toBe("test@mail.com");
+    const createUserMock = jest.spyOn(authRepository, 'createUser');
+
+    await expect(authService.register(data)).rejects.toBeInstanceOf(BadRequestError);
+
+    expect(findByEmailMock).toHaveBeenCalledWith(data.email);
+    expect(createUserMock).not.toHaveBeenCalled();
   });
 
-  test("login debe fallar si el usuario no existe", async () => {
-    authRepository.findByEmail.mockResolvedValue(null);
+  test('crea usuario cuando email es nuevo', async () => {
+    const data = { email: 'test@example.com', password: '123456', name: 'Test' };
 
-    await expect(
-      authService.login("none@mail.com", "pass")
-    ).rejects.toThrow("Credenciales inválidas");
+    jest.spyOn(authRepository, 'findByEmail').mockResolvedValue(null);
+
+    const createdUser = {
+      id: 1,
+      email: data.email,
+      name: data.name,
+      password: 'hashed-pass',
+      dataValues: { id: 1, email: data.email, name: data.name },
+    };
+
+    const createUserMock = jest
+      .spyOn(authRepository, 'createUser')
+      .mockResolvedValue(createdUser);
+
+    const result = await authService.register(data);
+
+    expect(createUserMock).toHaveBeenCalled();
+    expect(result).toMatchObject({
+      id: 1,
+      email: data.email,
+      name: data.name,
+    });
   });
 });

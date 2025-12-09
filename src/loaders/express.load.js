@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
-import { routes } from '../routes/index.js';
+import routes from '../routes/index.js';
 import { responseHandler } from '../middlewares/index.js';
 import { errorHandlerMiddleware } from '../middlewares/index.js';
 import { swaggerOptions } from '../config/swagger.js';
@@ -33,12 +33,28 @@ export const loadExpress = (app) => {
   app.use(responseHandler);
 
   // Swagger (UI + JSON)
+  const swaggerCustomCss = `
+  .swagger-ui .opblock-tag small {
+    display: block !important;
+    margin-top: 4px !important;
+  }
+  .swagger-ui .opblock-tag a {
+    display: block !important;
+  }
+  .swagger-ui .opblock-tag {
+    display: block !important;
+  }
+  `;
+
   const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
   app.use(
     `/api/${config.app.apiVersion}/docs`,
     swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec)
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customCss: swaggerCustomCss,
+    })
   );
 
   app.get(`/api/${config.app.apiVersion}/docs.json`, (req, res) => {
@@ -77,9 +93,12 @@ export const loadExpress = (app) => {
   // Routes
   routes(app);
 
-  // 404 handler
-  app.use((req, res) => {
-    res.notFound('Route not found');
+  // 404
+  app.use((req, res, next) => {
+    if (!res.headersSent) {
+      return res.notFound('Route not found');
+    }
+    next();
   });
 
   // Error handler (debe ir al final)

@@ -5,14 +5,14 @@ export const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ error: 'Token requerido' });
+      return res.unauthorized('Token is invalid or expired');
     }
-
+    
     const decoded = verifyToken(token);
     req.user = decoded;
 
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Token inválido' });
+    return res.unauthorized('Token is invalid or expired');
   }
 };
