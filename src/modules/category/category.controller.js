@@ -18,7 +18,17 @@ const getById = async (req, res, next) => {
   }
 };
 
+const create = async (req, res, next) => {
+  try {
+    const category = await categoryService.create(req.body);
+    return res.created(category, 'Category created successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const categoryController = {
   list,
-  getById
+  getById,
+  create
 };

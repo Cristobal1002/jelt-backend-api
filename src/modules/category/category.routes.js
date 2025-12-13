@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { categoryController } from './category.controller.js';
 import {
   listCategoryValidator,
+  createCategoryValidator,
 } from './category.validator.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { validateRequest } from '../../middlewares/validate-request.middleware.js';
@@ -87,6 +88,74 @@ router.use(authMiddleware);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: Crear nueva categoría
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Inyectables"
+ *               description:
+ *                 type: string
+ *                 example: "Categoría para productos inyectables"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Categoría creada exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 201
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Category created successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *                 error:
+ *                   type: object
+ *       400:
+ *         description: Error de validación en los datos de entrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Token inválido o no proporcionado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
+ *       500:
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/', createCategoryValidator, validateRequest, categoryController.create);
+
 router.get('/', listCategoryValidator, validateRequest, categoryController.list);
 
 /**
