@@ -32,13 +32,30 @@ const list = async (query) => {
 const getById = async (id) => {
   if (!id) throw new BadRequestError('Id is required');
 
-  const supplier = await categoryRepository.findById(id);
-  if (!supplier) throw new NotFoundError('Supplier not found');
+  const category = await categoryRepository.findById(id);
+  if (!category) throw new NotFoundError('Category not found');
 
-  return supplier;
+  return category;
+};
+
+const create = async (data) => {
+  const { name, description, isActive } = data;
+
+  if (!name) {
+    throw new BadRequestError('Name is required');
+  }
+
+  const category = await categoryRepository.create({
+    name,
+    description: description || null,
+    isActive: isActive !== undefined ? isActive : true,
+  });
+
+  return category;
 };
 
 export const categoryService = {
   list,
-  getById
+  getById,
+  create
 };
