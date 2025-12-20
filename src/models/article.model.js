@@ -63,6 +63,41 @@ export class Article extends Model {
           type: DataTypes.BOOLEAN,
           defaultValue: false,
         },
+        // NUEVOS CAMPOS -------------------------
+        demand_daily_avg: {
+          type: DataTypes.DECIMAL,
+          allowNull: true,
+          defaultValue: 0,
+          comment: 'Demanda promedio diaria.',
+        },
+
+        demand_daily_std: {
+          type: DataTypes.DECIMAL,
+          allowNull: true,
+          defaultValue: 0,
+          comment: 'Desviación estándar de la demanda diaria.',
+        },
+
+        lead_time_days: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          defaultValue: 1,
+          comment: 'Lead time promedio en días.',
+        },
+
+        service_level: {
+          type: DataTypes.DECIMAL,
+          allowNull: true,
+          defaultValue: 0.95,
+          comment: 'Nivel de servicio deseado para el cálculo del stock de seguridad.',
+        },
+
+        safety_stock: {
+          type: DataTypes.DECIMAL,
+          allowNull: true,
+          comment: 'Stock de seguridad calculado. Opcional si quieres almacenarlo.',
+        },
+        //----------------------------------------
       },
       {
         sequelize,
