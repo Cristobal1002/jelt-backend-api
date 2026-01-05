@@ -29,6 +29,7 @@ export class Role extends Model {
         modelName: 'Role',
         tableName: 'roles',
         timestamps: true,
+        //freezeTableName: true,
       }
     );
   }

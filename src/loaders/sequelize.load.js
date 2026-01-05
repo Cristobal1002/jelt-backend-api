@@ -18,10 +18,6 @@ export const loadDatabase = async () => {
     // Inicializa modelos
     initModels(sqz);
 
-    await seedRoles();
-
-    logger.info('Models initialized');
-
     // Sincronizar modelos con la base de datos
     if (config.db.sync.mode) {
       logger.info('Synchronizing models...');
@@ -88,6 +84,10 @@ export const loadDatabase = async () => {
         await sqz.sync(syncOptions);
         logger.info('Models synchronized with the database');
       }
+
+      // Sembrar datos iniciales para roles, si o si debe mandarse llamar después de sync de modelos 
+      await seedRoles();
+
     } else {
       logger.info('Sync disabled (use migrations for changes in the database)');
     }
