@@ -6,6 +6,7 @@ import supplierRoutes from "../modules/supplier/supplier.routes.js";
 import categoryRoutes from "../modules/category/category.routes.js";
 import stockroomRoutes from "../modules/stockroom/stockroom.routes.js";
 import assistantRoutes from "../modules/assistant/assistant.routes.js"; 
+import inventoryHistoryRoutes from "../modules/inventory-history/inventory-history.routes.js";
 import replenishmentRoutes from "../modules/replenishment/replenishment.routes.js";
 
 import { config } from "../config/index.js";
@@ -20,6 +21,7 @@ const routes = (app) => {
   router.use("/categories", categoryRoutes);
   router.use("/stockroom", stockroomRoutes);
   router.use("/assistant", assistantRoutes);
+  router.use("/inventory-history", inventoryHistoryRoutes);
   router.use("/replenishment", replenishmentRoutes);
 
   app.use(`/api/${config.app.apiVersion}`, router);

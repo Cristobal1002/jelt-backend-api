@@ -92,10 +92,10 @@ class AssistantRepository {
     const stock = article.stock ?? 0;
 
     // Ajusta estos campos a tu modelo real:
-    const demandDailyAvg = article.demand_daily_avg ?? 0;   // demanda promedio diaria
-    const demandDailyStd = article.demand_daily_std ?? 0;   // desviación estándar diaria
-    const leadTimeDays   = article.lead_time_days ?? 1;     // lead time en días
-    const serviceLevel   = article.service_level ?? 0.95;   // 95% por defecto
+    const demandDailyAvg = Number(article.demand_daily_avg ?? 0);   // demanda promedio diaria
+    const demandDailyStd = Number(article.demand_daily_std ?? 0);   // desviación estándar diaria
+    const leadTimeDays   = Number(article.lead_time ?? 1);     // lead time en días
+    const serviceLevel   = Number(article.service_level ?? 0.95);   // 95% por defecto
 
     const currentReorderPoint = article.reorder_point ?? null;
 

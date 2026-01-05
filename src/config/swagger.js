@@ -247,6 +247,7 @@ export const swaggerOptions = {
   apis: [
     // Rutas principales
     path.resolve(__dirname, '../routes/*.js'),
+    path.resolve(__dirname, '../modules/**/*.swagger.js'),
     // Módulos (como auth.routes.js)
     path.resolve(__dirname, '../modules/**/*.routes.js'),
   ],
