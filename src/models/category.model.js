@@ -9,6 +9,10 @@ export class Category extends Model {
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
         },
+        id_user: {
+          type: DataTypes.UUID,
+          allowNull: false,
+        },
         name: {
           type: DataTypes.STRING,
           allowNull: false,
@@ -27,6 +31,16 @@ export class Category extends Model {
         modelName: 'Category',
         tableName: 'categories',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }

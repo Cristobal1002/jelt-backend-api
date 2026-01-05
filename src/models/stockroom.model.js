@@ -9,6 +9,10 @@ export class Stockroom extends Model {
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
         },
+        id_user: {
+          type: DataTypes.UUID,
+          allowNull: false,
+        },
         name: {
           type: DataTypes.STRING,
           allowNull: false,
@@ -27,6 +31,16 @@ export class Stockroom extends Model {
         modelName: 'Stockroom',
         tableName: 'stockrooms',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }
@@ -36,5 +50,20 @@ export class Stockroom extends Model {
       as: 'articles',
       foreignKey: 'id_stockroom',
     });
+
+    // Históricos (opcional, para analítica / assistant)
+    if (models.SalesHistory) {
+      Stockroom.hasMany(models.SalesHistory, {
+        as: 'salesHistory',
+        foreignKey: 'id_stockroom',
+      });
+    }
+
+    if (models.StockMovement) {
+      Stockroom.hasMany(models.StockMovement, {
+        as: 'stockMovements',
+        foreignKey: 'id_stockroom',
+      });
+    }
   }
 }

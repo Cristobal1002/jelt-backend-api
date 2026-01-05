@@ -197,7 +197,7 @@ export const swaggerOptions = {
           type: 'object',
           properties: {
             id: { type: 'string', format: 'uuid' },
-            name: { type: 'string', example: 'Tecnología' },
+            name: { type: 'string', example: 'Consumibles' },
             description: { type: 'string', nullable: true },
             isActive: { type: 'boolean', example: true },
             createdAt: { type: 'string', format: 'date-time' },
@@ -247,6 +247,7 @@ export const swaggerOptions = {
   apis: [
     // Rutas principales
     path.resolve(__dirname, '../routes/*.js'),
+    path.resolve(__dirname, '../modules/**/*.swagger.js'),
     // Módulos (como auth.routes.js)
     path.resolve(__dirname, '../modules/**/*.routes.js'),
   ],

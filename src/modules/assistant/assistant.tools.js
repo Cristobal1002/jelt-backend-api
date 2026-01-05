@@ -1,16 +1,29 @@
 export const assistantTools = [
   {
     type: 'function',
-    name: 'get_article_stock',
+    name: 'get_article_stock_by_sku',
     description:
-      'Obtiene información de stock de artículos por SKU o nombre. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico.',
+      'Obtiene información de stock de artículos por SKU. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico por SKU.',
     parameters: {
       type: 'object',
       properties: {
         sku: {
           type: 'string',
-          description: 'SKU exacto del artículo. Opcional si se usa nombre.',
-        },
+          description: 'SKU exacto del artículo',
+        }
+      },
+      additionalProperties: false,
+    },
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'get_article_stock_by_name',
+    description:
+      'Obtiene información de stock de artículos por nombre. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico por nombre.',
+    parameters: {
+      type: 'object',
+      properties: {
         name: {
           type: 'string',
           description: 'Nombre (o parte del nombre) del artículo.',
@@ -18,7 +31,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -41,7 +54,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -53,7 +66,7 @@ export const assistantTools = [
       properties: {},
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -75,7 +88,7 @@ export const assistantTools = [
         required: [],
         additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -117,6 +130,75 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'get_sales_summary',
+    description:
+      'Obtiene un resumen de ventas (unidades y transacciones) en un rango de fechas para un artículo y/o almacén. Úsalo para preguntas sobre ventas o consumo histórico.',
+    parameters: {
+      type: 'object',
+      properties: {
+        articleId: { type: 'string', description: 'Id del artículo (UUID).' },
+        stockroomId: { type: 'string', description: 'Id del almacén (UUID).' },
+        from: { type: 'string', description: 'Fecha ISO inicio (YYYY-MM-DD o ISO8601).', },
+        to: { type: 'string', description: 'Fecha ISO fin (YYYY-MM-DD o ISO8601).', },
+      },
+      additionalProperties: false,
+    },
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'get_top_selling_articles',
+    description:
+      'Devuelve los artículos más vendidos en una ventana de tiempo (por defecto últimos 30 días). Útil para ranking de ventas.',
+    parameters: {
+      type: 'object',
+      properties: {
+        stockroomId: { type: 'string', description: 'Id del almacén (UUID). Opcional.' },
+        days: { type: 'integer', description: 'Ventana en días (por defecto 30).', default: 30 },
+        limit: { type: 'integer', description: 'Máximo de artículos.', default: 10 },
+      },
+      additionalProperties: false,
+    },
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'get_stock_movements',
+    description:
+      'Lista movimientos de inventario (IN/OUT/ADJUSTMENT) para auditoría y explicación de variaciones de stock.',
+    parameters: {
+      type: 'object',
+      properties: {
+        articleId: { type: 'string', description: 'Id del artículo (UUID).' },
+        stockroomId: { type: 'string', description: 'Id del almacén (UUID).' },
+        type: { type: 'string', enum: ['IN', 'OUT', 'ADJUSTMENT'], description: 'Tipo de movimiento.' },
+        from: { type: 'string', description: 'Fecha ISO inicio (YYYY-MM-DD o ISO8601).' },
+        to: { type: 'string', description: 'Fecha ISO fin (YYYY-MM-DD o ISO8601).' },
+        limit: { type: 'integer', description: 'Máximo de registros.', default: 50 },
+      },
+      additionalProperties: false,
+    },
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'predict_stockout_date',
+    description:
+      'Estima la fecha de quiebre de stock usando el stock actual del artículo y el promedio diario de ventas en una ventana (por defecto 30 días).',
+    parameters: {
+      type: 'object',
+      properties: {
+        articleId: { type: 'string', description: 'Id del artículo (UUID). Requerido.' },
+        stockroomId: { type: 'string', description: 'Id del almacén (UUID). Opcional.' },
+        days: { type: 'integer', description: 'Ventana en días para calcular promedio.', default: 30 },
+      },
+      required: ['articleId'],
+      additionalProperties: false,
+    },
+    //strict: true,
   },
 ];

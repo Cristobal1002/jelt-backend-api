@@ -5,8 +5,10 @@ import { Category } from '../../models/category.model.js';
 import { Supplier } from '../../models/supplier.model.js';
 
 class AssistantRepository {
-  async findArticleBySkuOrName({ sku, name }) {
+  async findArticleBySkuOrName({ sku, name, userId }) {
     const where = {};
+
+    where.id_user = userId;
 
     if (sku) {
       where.sku = sku;
@@ -27,8 +29,10 @@ class AssistantRepository {
     });
   }
 
-  async findLowStockArticles({ limit = 20, stockroomId = null }) {
+  async findLowStockArticles({ limit = 20, stockroomId = null, userId }) {
     const where = {};
+
+    where.id_user = userId;
 
     if (stockroomId) {
       where.id_stockroom = stockroomId;
@@ -47,8 +51,13 @@ class AssistantRepository {
     });
   }
 
-  async getStockDistributionByStockroom() {
+  async getStockDistributionByStockroom({ userId }) {
+    const where = {};
+
+    where.id_user = userId;
+
     return Article.findAll({
+      where,
       attributes: [
         'id_stockroom',
         [fn('SUM', col('stock')), 'total_stock'],
@@ -57,15 +66,17 @@ class AssistantRepository {
         {
           model: Stockroom,
           as: 'stockroom',
-          attributes: ['id', 'name', 'address', 'city', 'country'],
+          attributes: ['id', 'name', 'address'],
         },
       ],
       group: ['id_stockroom', 'stockroom.id'],
     });
   }
 
-  async getReorderSuggestion({ articleId, sku }) {
+  async getReorderSuggestion({ articleId, sku, userId }) {
     const where = {};
+    
+    where.id_user = userId;
 
     if (articleId) {
       where.id = articleId;
@@ -92,10 +103,10 @@ class AssistantRepository {
     const stock = article.stock ?? 0;
 
     // Ajusta estos campos a tu modelo real:
-    const demandDailyAvg = article.demand_daily_avg ?? 0;   // demanda promedio diaria
-    const demandDailyStd = article.demand_daily_std ?? 0;   // desviación estándar diaria
-    const leadTimeDays   = article.lead_time_days ?? 1;     // lead time en días
-    const serviceLevel   = article.service_level ?? 0.95;   // 95% por defecto
+    const demandDailyAvg = Number(article.demand_daily_avg ?? 0);   // demanda promedio diaria
+    const demandDailyStd = Number(article.demand_daily_std ?? 0);   // desviación estándar diaria
+    const leadTimeDays   = Number(article.lead_time ?? 1);     // lead time en días
+    const serviceLevel   = Number(article.service_level ?? 0.95);   // 95% por defecto
 
     const currentReorderPoint = article.reorder_point ?? null;
 
@@ -153,8 +164,10 @@ class AssistantRepository {
     supplierName,
     lowStockOnly = false,
     limit = 50,
+    userId
   }) {
     const where = {};
+    where.id_user = userId;
     const include = [];
 
     if (categoryId || categoryName) {

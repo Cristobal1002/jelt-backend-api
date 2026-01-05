@@ -5,13 +5,17 @@ import { Supplier } from '../../models/supplier.model.js';
 import { Stockroom } from '../../models/stockroom.model.js';
 
 class ArticleRepository {
-  async create(data) {
-    return Article.create(data);
+
+  async create(userId, data) {
+    return Article.create({
+      ...data,
+      id_user: userId,
+    });
   }
 
-  async findById(id) {
+  async findById(userId, id) {
     return Article.findOne({
-      where: { id, isDelete: false },
+      where: { id, isDelete: false, id_user: userId },
       include: [
         { model: Category, as: 'category' },
         { model: Supplier, as: 'supplier' },
@@ -27,8 +31,10 @@ class ArticleRepository {
    * - name (contains, case-insensitive)
    * - priceGt, priceLt, priceMin, priceMax (unit_price con >, <, between)
    */
-  async findAllPaginated(filters, { limit, offset }) {
+  async findAllPaginated(userId , filters, { limit, offset }) {
     const where = { isDelete: false };
+
+    where.id_user = userId; // Obligar la consultar por usuario que lo pide.
 
     if (filters.id) {
       where.id = filters.id;
@@ -84,16 +90,16 @@ class ArticleRepository {
     return result; // { rows, count }
   }
 
-  async update(id, data) {
+  async update(userId, id, data) {
     return Article.update(data, {
-      where: { id, isDelete: false },
+      where: { id, isDelete: false, id_user: userId },
     });
   }
 
-  async softDelete(id) {
+  async softDelete(userId, id) {
     return Article.update(
       { isDelete: true, isActive: false },
-      { where: { id } }
+      { where: { id, id_user: userId } }
     );
   }
 }

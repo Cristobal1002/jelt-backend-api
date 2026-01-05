@@ -1,6 +1,7 @@
-import { openaiClient, OPENAI_MODEL } from '../../config/openai.js';
+import { getOpenAIClient, OPENAI_MODEL } from '../../config/openai.js';
 import { assistantTools } from './assistant.tools.js';
 import { assistantRepository } from './assistant.repository.js';
+import { inventoryHistoryRepository } from '../inventory-history/inventory-history.repository.js';
 
 const SYSTEM_INSTRUCTIONS = `
 Eres un asistente especializado en inventario de la aplicación Jelt.
@@ -15,11 +16,21 @@ Reglas:
 - Si los datos devueltos por las funciones son muchos, resume los más relevantes.
 `;
 
-const executeTool = async (toolCall) => {
+const safeParseArgs = (toolCall) => {
+  if (!toolCall.arguments) return {};
+  try { return JSON.parse(toolCall.arguments); }
+  catch { return { __parseError: true, raw: toolCall.arguments }; }
+};
+
+const MAX_TOOL_ITERATIONS = 3;
+
+const executeTool = async (toolCall, userId) => {
   const args = toolCall.arguments ? JSON.parse(toolCall.arguments) : {};
 
+  args.userId = userId;
+
   switch (toolCall.name) {
-    case 'get_article_stock': {
+    case 'get_article_stock_by_sku': {
       const articles = await assistantRepository.findArticleBySkuOrName(args);
       return {
         items: articles.map((a) => ({
@@ -28,7 +39,34 @@ const executeTool = async (toolCall) => {
           name: a.name,
           stock: a.stock,
           reorder_point: a.reorder_point,
-          lead_time_days: a.lead_time_days,
+          lead_time: a.lead_time,
+          stockroom: a.stockroom
+            ? {
+                id: a.stockroom.id,
+                name: a.stockroom.name,
+                address: a.stockroom.address,
+              }
+            : null,
+          category: a.category
+            ? { id: a.category.id, name: a.category.name }
+            : null,
+          supplier: a.supplier
+            ? { id: a.supplier.id, name: a.supplier.name }
+            : null,
+        })),
+      };
+    }
+
+    case 'get_article_stock_by_name': {
+      const articles = await assistantRepository.findArticleBySkuOrName(args);
+      return {
+        items: articles.map((a) => ({
+          id: a.id,
+          sku: a.sku,
+          name: a.name,
+          stock: a.stock,
+          reorder_point: a.reorder_point,
+          lead_time: a.lead_time,
           stockroom: a.stockroom
             ? {
                 id: a.stockroom.id,
@@ -61,7 +99,7 @@ const executeTool = async (toolCall) => {
     }
 
     case 'get_stock_distribution': {
-      const rows = await assistantRepository.getStockDistributionByStockroom();
+      const rows = await assistantRepository.getStockDistributionByStockroom({ userId });
       return {
         stockrooms: rows.map((r) => ({
           stockroom_id: r.stockroom.id,
@@ -146,71 +184,84 @@ const executeTool = async (toolCall) => {
       };
     }
 
+    case 'get_sales_summary': {
+      const summary = await inventoryHistoryRepository.getSalesSummary(args);
+      return summary;
+    }
+
+    case 'get_top_selling_articles': {
+      const items = await inventoryHistoryRepository.getTopSellingArticles(args);
+      return { items };
+    }
+
+    case 'get_stock_movements': {
+      const data = await inventoryHistoryRepository.listMovements(args);
+      return {
+        count: data.count,
+        items: data.rows.map((m) => ({
+          id: m.id,
+          type: m.type,
+          quantity: m.quantity,
+          moved_at: m.moved_at,
+          reference: m.reference,
+          article: m.article ? { id: m.article.id, sku: m.article.sku, name: m.article.name } : null,
+          stockroom: m.stockroom ? { id: m.stockroom.id, name: m.stockroom.name } : null,
+        })),
+      };
+    }
+
+    case 'predict_stockout_date': {
+      const res = await inventoryHistoryRepository.predictStockoutDate(args);
+      return res;
+    }
+
     default:
       return { error: `Tool not implemented: ${toolCall.name}` };
   }
 };
 
 const chat = async ({ userMessage, userId }) => {
-  // 1. Primer llamado: modelo decide si usar tools
+  const client = getOpenAIClient();
+  if (!client) {
+    return { reply: 'El asistente de IA está deshabilitado.', usedTools: [] };
+  }
+
   let input = [
     { role: 'system', content: SYSTEM_INSTRUCTIONS },
-    {
-      role: 'user',
-      content: userMessage,
-    },
+    { role: 'user', content: userMessage },
   ];
 
-  let response = await openaiClient.responses.create({
-    model: OPENAI_MODEL,
-    tools: assistantTools,
-    input,
-  });
+  const usedTools = new Set();
 
-  const toolCalls = response.output.filter(
-    (item) => item.type === 'function_call'
-  );
+  for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+    const response = await client.responses.create({ model: OPENAI_MODEL, tools: assistantTools, input });
+    const toolCalls = (response.output || []).filter((x) => x.type === 'function_call');
 
-  // Si no pidió tools, devolvemos la respuesta directa del modelo
-  if (!toolCalls.length) {
-    return {
-      reply: response.output_text,
-      usedTools: [],
-    };
+    if (!toolCalls.length) {
+      return { reply: response.output_text, usedTools: [...usedTools] };
+    }
+
+    const toolOutputs = [];
+    for (const toolCall of toolCalls) {
+      usedTools.add(toolCall.name);
+      const args = safeParseArgs(toolCall);
+
+      console.log('Executing tool:', toolCall.name, 'with args:', args);
+
+      const output = await executeTool({ ...toolCall, arguments: JSON.stringify(args) }, userId);
+      toolOutputs.push({
+        type: 'function_call_output',
+        call_id: toolCall.call_id,
+        output: JSON.stringify(output),
+      });
+    }
+
+    input = [...input, ...response.output, ...toolOutputs];
   }
-
-  // 2. Ejecutar tools y preparar segunda llamada
-  const toolOutputs = [];
-
-  for (const toolCall of toolCalls) {
-    const output = await executeTool(toolCall);
-    toolOutputs.push({
-      type: 'function_call_output',
-      call_id: toolCall.call_id,
-      // la API espera string; usamos JSON.stringify
-      output: JSON.stringify(output),
-    });
-  }
-
-  // Agregamos al input original la salida de los tools
-  input = [
-    ...input,
-    ...response.output, // lo que generó el modelo, incluyendo function_call
-    ...toolOutputs,
-  ];
-
-  // 3. Segundo llamado: el modelo verbaliza la respuesta final
-  response = await openaiClient.responses.create({
-    model: OPENAI_MODEL,
-    tools: assistantTools,
-    instructions:
-      'Responde en español usando la información devuelta por las funciones. Sé concreto y útil para el usuario.',
-    input,
-  });
 
   return {
-    reply: response.output_text,
-    usedTools: toolCalls.map((t) => t.name),
+    reply: 'No pude completar la respuesta con las herramientas disponibles. Intenta reformular tu pregunta.',
+    usedTools: [...usedTools],
   };
 };
 

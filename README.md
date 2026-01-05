@@ -44,15 +44,22 @@ npm start
 ```
 ├── src/
 │   ├── config/          # Configuraciones (DB, Firebase, etc.)
-│   ├── controllers/      # Controladores
+│   ├── constants/       # Declaración de constantes generales
+│   ├── controllers/     # Controladores
 │   ├── errors/          # Clases de errores personalizados
 │   ├── loaders/         # Cargadores (Express, DB, etc.)
 │   ├── middlewares/     # Middlewares personalizados
 │   ├── models/          # Modelos de Sequelize
 │   ├── routes/          # Definición de rutas
 │   ├── modules/         
-│   │    └── auth/        # Implementacion Autenticación, Login y Registro
-│   ├── services/        # Lógica de negocio (****)
+│   │    └── article/               # Implementacion para manejo de articulos
+│   │    └── assistant/             # Implementacion para chatbot, asistente con openAI
+│   │    └── auth/                  # Implementacion Autenticación, Login y Registro
+│   │    └── category/              # Implementacion gestión de categorias (eje: consumibles)
+│   │    └── inventory-history/     # Implementacion Historicos (ventas, movimientos)
+│   │    └── replenishment/         # Implementacion entradas de inventario
+│   │    └── stockroom/             # Implementacion para manejo de inventario localizado, stock o bodegas
+│   │    └── supplier/              # Implementacion de Proveedores
 │   ├── utils/           # Utilidades (logger, helpers)
 │   └── server.js        # Configuración del servidor
 ├── app.js               # Punto de entrada
@@ -73,7 +80,25 @@ npm start
 
 ### Variables de Entorno
 
-Ver `.env.example` para todas las variables disponibles.
+#### Ejemplo de archivo de variables de entorno
+
+- `.env`
+```bash
+DB_LOGGING=true
+DB_NAME=jelt-dev
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASSWORD=el_password_database
+DB_PORT=5432
+NODE_ENV=development
+API_VERSION=v1
+APP_NAME=Jelt
+DB_SYNC_MODE=alter
+JWT_SECRET=valor_jwt_token_secret
+AI_ENABLED=true
+OPENAI_API_KEY=llave_open_ai_valida
+OPENAI_MODEL=gpt-4.1-mini
+```
 
 ### Base de Datos
 

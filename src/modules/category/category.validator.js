@@ -2,7 +2,7 @@ import { body, query } from 'express-validator';
 
 export const createCategoryValidator = [
   body('name').notEmpty().withMessage('name is required'),
-    body('isActive').optional().isBoolean()
+  body('isActive').optional().isBoolean()
 ];
 
 export const updateCategoryValidator = [

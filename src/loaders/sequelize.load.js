@@ -2,6 +2,7 @@ import { sqz } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 import { initModels } from '../models/index.js';
+import { seedRoles } from '../models/seed/role.seed.js';
 
 export const loadDatabase = async () => {
   if (!config.db.enabled) {
@@ -16,7 +17,6 @@ export const loadDatabase = async () => {
 
     // Inicializa modelos
     initModels(sqz);
-    logger.info('Models initialized');
 
     // Sincronizar modelos con la base de datos
     if (config.db.sync.mode) {
@@ -84,6 +84,10 @@ export const loadDatabase = async () => {
         await sqz.sync(syncOptions);
         logger.info('Models synchronized with the database');
       }
+
+      // Sembrar datos iniciales para roles, si o si debe mandarse llamar después de sync de modelos 
+      await seedRoles();
+
     } else {
       logger.info('Sync disabled (use migrations for changes in the database)');
     }

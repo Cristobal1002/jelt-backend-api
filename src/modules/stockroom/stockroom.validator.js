@@ -1,4 +1,14 @@
 import { body, query } from 'express-validator';
+import { STOCK_MOVEMENT_TYPES_VALUES } from '../../constants/stock-movement-types.js';
+
+export const createStockMovementValidator = [
+  body('type')
+    .isIn(STOCK_MOVEMENT_TYPES_VALUES)
+    .withMessage(`type must be one of: ${STOCK_MOVEMENT_TYPES_VALUES.join(', ')}`),
+
+  body('quantity').isInt({ min: 1 }),
+  body('id_article').isInt(),
+];
 
 export const createStockroomValidator = [
   body('name').notEmpty().withMessage('name is required')

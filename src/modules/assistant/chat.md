@@ -22,7 +22,7 @@ Para cada artículo vamos a considerar:
 
 * **Demanda promedio diaria**: `demand_daily_avg`
 * **Desviación estándar diaria de la demanda**: `demand_daily_std`
-* **Lead time en días**: `lead_time_days`
+* **Lead time en días**: `lead_time`
 * **Nivel de servicio deseado**: `service_level` (ej. 0.95, 0.98, 0.99)
 * **Stock actual**: `stock`
 * (Opcional) **reorder_point actual**: `reorder_point` (por si ya lo guardas)
@@ -30,8 +30,8 @@ Para cada artículo vamos a considerar:
 Cálculos:
 
 ```txt
-demanda_esperada_LT = demand_daily_avg * lead_time_days
-desviacion_LT        = demand_daily_std * sqrt(lead_time_days)
+demanda_esperada_LT = demand_daily_avg * lead_time
+desviacion_LT        = demand_daily_std * sqrt(lead_time)
 z                    = z(service_level)   // valor z de la normal estándar
 stock_seguridad      = z * desviacion_LT
 

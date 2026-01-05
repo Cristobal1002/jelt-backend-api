@@ -2,7 +2,8 @@ import { articleService } from './article.service.js';
 
 const create = async (req, res, next) => {
   try {
-    const article = await articleService.create(req.body);
+    const userId = req.user.id;
+    const article = await articleService.create(userId, req.body);
     return res.created(article, 'Article created successfully');
   } catch (error) {
     return next(error);
@@ -11,7 +12,8 @@ const create = async (req, res, next) => {
 
 const list = async (req, res, next) => {
   try {
-    const result = await articleService.list(req.query);
+    const userId = req.user.id;
+    const result = await articleService.list(userId, req.query);
     // result = { items, meta }
     return res.ok(result, 'Articles retrieved successfully');
   } catch (error) {
@@ -21,7 +23,8 @@ const list = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const article = await articleService.getById(req.params.id);
+    const userId = req.user.id;
+    const article = await articleService.getById(userId, req.params.id);
     return res.ok(article, 'Article retrieved successfully');
   } catch (error) {
     return next(error);
@@ -30,7 +33,8 @@ const getById = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const article = await articleService.update(req.params.id, req.body);
+    const userId = req.user.id;
+    const article = await articleService.update(userId, req.params.id, req.body);
     return res.ok(article, 'Article updated successfully');
   } catch (error) {
     return next(error);
@@ -39,7 +43,8 @@ const update = async (req, res, next) => {
 
 const softDelete = async (req, res, next) => {
   try {
-    await articleService.softDelete(req.params.id);
+    const userId = req.user.id;
+    await articleService.softDelete(userId, req.params.id);
     return res.ok({}, 'Article deleted successfully');
   } catch (error) {
     return next(error);

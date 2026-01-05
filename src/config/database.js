@@ -12,6 +12,7 @@ const sqz = new Sequelize(
         dialect: config.db.dialect,
         pool: config.db.pool,
         logging: config.db.logging ? (msg) => logger.debug(msg) : false,
+        benchmark: true,
     }
 );
 

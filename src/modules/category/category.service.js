@@ -2,7 +2,11 @@ import { categoryRepository } from './category.repository.js';
 import { buildPagination, buildMeta } from '../../utils/pagination.js';
 import { BadRequestError, NotFoundError } from '../../errors/http.error.js';
 
-const list = async (query) => {
+const create = async (userId, data) => {
+  return categoryRepository.create(userId, data);
+};
+
+const list = async (userId, query) => {
   const { page, perPage, name, isActive } = query;
   const pagination = buildPagination(page, perPage);
 
@@ -15,6 +19,7 @@ const list = async (query) => {
   };
 
   const { rows, count } = await categoryRepository.findAllPaginated(
+    userId,
     filters,
     pagination
   );
@@ -29,33 +34,27 @@ const list = async (query) => {
   };
 };
 
-const getById = async (id) => {
+const getById = async (userId, id) => {
   if (!id) throw new BadRequestError('Id is required');
 
-  const category = await categoryRepository.findById(id);
-  if (!category) throw new NotFoundError('Category not found');
+  const supplier = await categoryRepository.findById(userId, id);
+  if (!supplier) throw new NotFoundError('Supplier not found');
 
-  return category;
+  return supplier;
 };
 
-const create = async (data) => {
-  const { name, description, isActive } = data;
+const update = async (userId, id, data) => {
+  if (!id) throw new BadRequestError('Id is required');
 
-  if (!name) {
-    throw new BadRequestError('Name is required');
-  }
+  const [affected] = await categoryRepository.update(userId, id, data);
+  if (!affected) throw new NotFoundError('Controller not found');
 
-  const category = await categoryRepository.create({
-    name,
-    description: description || null,
-    isActive: isActive !== undefined ? isActive : true,
-  });
-
-  return category;
+  return categoryRepository.findById(userId, id);
 };
 
 export const categoryService = {
+  create,
   list,
   getById,
-  create
+  update
 };
