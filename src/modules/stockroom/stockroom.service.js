@@ -2,11 +2,11 @@ import { stockroomRepository } from './stockroom.repository.js';
 import { buildPagination, buildMeta } from '../../utils/pagination.js';
 import { BadRequestError, NotFoundError } from '../../errors/http.error.js';
 
-const create = async (data) => {
-  return stockroomRepository.create(data);
+const create = async (userId, data) => {
+  return stockroomRepository.create(userId, data);
 };
 
-const list = async (query) => {
+const list = async (userId, query) => {
   const { page, perPage, name, isActive } = query;
   const pagination = buildPagination(page, perPage);
 
@@ -19,6 +19,7 @@ const list = async (query) => {
   };
 
   const { rows, count } = await stockroomRepository.findAllPaginated(
+    userId,
     filters,
     pagination
   );
@@ -33,22 +34,22 @@ const list = async (query) => {
   };
 };
 
-const getById = async (id) => {
+const getById = async (userId, id) => {
   if (!id) throw new BadRequestError('Id is required');
 
-  const data = await stockroomRepository.findById(id);
+  const data = await stockroomRepository.findById(userId, id);
   if (!data) throw new NotFoundError('Controller not found');
 
   return data;
 };
 
-const update = async (id, data) => {
+const update = async (userId, id, data) => {
   if (!id) throw new BadRequestError('Id is required');
 
-  const [affected] = await stockroomRepository.update(id, data);
+  const [affected] = await stockroomRepository.update(userId, id, data);
   if (!affected) throw new NotFoundError('Controller not found');
 
-  return stockroomRepository.findById(id);
+  return stockroomRepository.findById(userId, id);
 };
 
 export const stockroomService = {
