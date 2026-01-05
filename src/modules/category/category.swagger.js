@@ -13,6 +13,68 @@
 /**
  * @swagger
  * /categories:
+ *   post:
+ *     summary: Crear una nueva Categoria
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Consumibles"
+ *               description:
+ *                 type: string
+ *                 example: "Categoría para artículos consumibles"
+ *     responses:
+ *       201:
+ *         description: Categoria creada exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *                 error:
+ *                   type: object
+ *       400:
+ *         description: Error de validación en los datos de entrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Token inválido o no proporcionado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorUnauthorizedResponse'
+ *       500:
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+
+/**
+ * @swagger
+ * /categories:
  *   get:
  *     summary: Listar categorías
  *     tags: [Categories]

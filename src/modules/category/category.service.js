@@ -2,6 +2,10 @@ import { categoryRepository } from './category.repository.js';
 import { buildPagination, buildMeta } from '../../utils/pagination.js';
 import { BadRequestError, NotFoundError } from '../../errors/http.error.js';
 
+const create = async (userId, data) => {
+  return categoryRepository.create(userId, data);
+};
+
 const list = async (userId, query) => {
   const { page, perPage, name, isActive } = query;
   const pagination = buildPagination(page, perPage);
@@ -40,6 +44,7 @@ const getById = async (userId, id) => {
 };
 
 export const categoryService = {
+  create,
   list,
   getById
 };
