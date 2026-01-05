@@ -97,6 +97,17 @@ export class Article extends Model {
         modelName: 'Article',
         tableName: 'articles',
         timestamps: true,
+        /** Se protege propiedad de id_user, en la capa de Repositorio si se necesita el campo usar "await Article.scope('withUser').findAll();" */
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }

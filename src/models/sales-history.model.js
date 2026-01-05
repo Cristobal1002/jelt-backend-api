@@ -57,6 +57,16 @@ export class SalesHistory extends Model {
         modelName: 'SalesHistory',
         tableName: 'sales_history',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }

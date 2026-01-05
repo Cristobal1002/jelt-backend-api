@@ -31,6 +31,16 @@ export class Category extends Model {
         modelName: 'Category',
         tableName: 'categories',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }

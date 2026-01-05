@@ -31,6 +31,16 @@ export class Stockroom extends Model {
         modelName: 'Stockroom',
         tableName: 'stockrooms',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }

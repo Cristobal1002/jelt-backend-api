@@ -65,6 +65,16 @@ export class StockMovement extends Model {
         modelName: 'StockMovement',
         tableName: 'stock_movements',
         timestamps: true,
+        defaultScope: {
+          attributes: {
+            exclude: ['id_user'],
+          },
+        },
+        scopes: {
+          withUser: {
+            attributes: { include: ['id_user'] },
+          },
+        },
       }
     );
   }
