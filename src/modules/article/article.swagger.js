@@ -122,6 +122,8 @@
  *         schema:
  *           type: integer
  *           minimum: 1
+ *           default: 1
+ *           example: 1
  *         description: Número de página (por defecto 1)
  *       - in: query
  *         name: perPage
@@ -129,6 +131,8 @@
  *           type: integer
  *           minimum: 1
  *           maximum: 100
+ *           default: 10
+ *           example: 10
  *         description: Registros por página (por defecto 10)
  *       - in: query
  *         name: sku

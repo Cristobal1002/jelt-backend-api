@@ -89,10 +89,14 @@
  *         name: page
  *         schema:
  *           type: integer
+ *           default: 1
+ *           example: 1
  *       - in: query
  *         name: perPage
  *         schema:
  *           type: integer
+ *           default: 10
+ *           example: 10
  *       - in: query
  *         name: name
  *         schema:
@@ -105,6 +109,8 @@
  *         name: isActive
  *         schema:
  *           type: boolean
+ *           default: true
+ *           example: true
  *     responses:
  *       200:
  *         description: Lista de proveedores obtenida correctamente.
