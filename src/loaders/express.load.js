@@ -32,34 +32,37 @@ export const loadExpress = (app) => {
   // Middleware de respuestas custom
   app.use(responseHandler);
 
-  // Swagger (UI + JSON)
-  const swaggerCustomCss = `
-  .swagger-ui .opblock-tag small {
-    display: block !important;
-    margin-top: 4px !important;
-  }
-  .swagger-ui .opblock-tag a {
-    display: block !important;
-  }
-  .swagger-ui .opblock-tag {
-    display: block !important;
-  }
-  `;
+  // Swagger only in development
+  if(config.app.nodeEnv === 'development') {
+    // Swagger (UI + JSON)
+    const swaggerCustomCss = `
+    .swagger-ui .opblock-tag small {
+      display: block !important;
+      margin-top: 4px !important;
+    }
+    .swagger-ui .opblock-tag a {
+      display: block !important;
+    }
+    .swagger-ui .opblock-tag {
+      display: block !important;
+    }
+    `;
 
-  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+    const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-  app.use(
-    `/api/${config.app.apiVersion}/docs`,
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec, {
-      explorer: true,
-      customCss: swaggerCustomCss,
-    })
-  );
+    app.use(
+      `/api/${config.app.apiVersion}/docs`,
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, {
+        explorer: true,
+        customCss: swaggerCustomCss,
+      })
+    );
 
-  app.get(`/api/${config.app.apiVersion}/docs.json`, (req, res) => {
-    res.json(swaggerSpec);
-  });
+    app.get(`/api/${config.app.apiVersion}/docs.json`, (req, res) => {
+      res.json(swaggerSpec);
+    });
+  }
 
   // Rate limiting
   const limiter = rateLimit({
