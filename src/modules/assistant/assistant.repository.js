@@ -5,8 +5,10 @@ import { Category } from '../../models/category.model.js';
 import { Supplier } from '../../models/supplier.model.js';
 
 class AssistantRepository {
-  async findArticleBySkuOrName({ sku, name }) {
+  async findArticleBySkuOrName({ sku, name, userId }) {
     const where = {};
+
+    where.id_user = userId;
 
     if (sku) {
       where.sku = sku;
@@ -27,8 +29,10 @@ class AssistantRepository {
     });
   }
 
-  async findLowStockArticles({ limit = 20, stockroomId = null }) {
+  async findLowStockArticles({ limit = 20, stockroomId = null, userId }) {
     const where = {};
+
+    where.id_user = userId;
 
     if (stockroomId) {
       where.id_stockroom = stockroomId;
@@ -47,8 +51,13 @@ class AssistantRepository {
     });
   }
 
-  async getStockDistributionByStockroom() {
+  async getStockDistributionByStockroom({ userId }) {
+    const where = {};
+
+    where.id_user = userId;
+
     return Article.findAll({
+      where,
       attributes: [
         'id_stockroom',
         [fn('SUM', col('stock')), 'total_stock'],
@@ -64,8 +73,10 @@ class AssistantRepository {
     });
   }
 
-  async getReorderSuggestion({ articleId, sku }) {
+  async getReorderSuggestion({ articleId, sku, userId }) {
     const where = {};
+    
+    where.id_user = userId;
 
     if (articleId) {
       where.id = articleId;
@@ -153,8 +164,10 @@ class AssistantRepository {
     supplierName,
     lowStockOnly = false,
     limit = 50,
+    userId
   }) {
     const where = {};
+    where.id_user = userId;
     const include = [];
 
     if (categoryId || categoryName) {

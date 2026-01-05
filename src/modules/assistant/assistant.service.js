@@ -24,8 +24,10 @@ const safeParseArgs = (toolCall) => {
 
 const MAX_TOOL_ITERATIONS = 3;
 
-const executeTool = async (toolCall) => {
+const executeTool = async (toolCall, userId) => {
   const args = toolCall.arguments ? JSON.parse(toolCall.arguments) : {};
+
+  args.userId = userId;
 
   switch (toolCall.name) {
     case 'get_article_stock': {
@@ -70,7 +72,7 @@ const executeTool = async (toolCall) => {
     }
 
     case 'get_stock_distribution': {
-      const rows = await assistantRepository.getStockDistributionByStockroom();
+      const rows = await assistantRepository.getStockDistributionByStockroom({ userId });
       return {
         stockrooms: rows.map((r) => ({
           stockroom_id: r.stockroom.id,
@@ -217,7 +219,7 @@ const chat = async ({ userMessage, userId }) => {
       usedTools.add(toolCall.name);
       const args = safeParseArgs(toolCall);
 
-      const output = await executeTool({ ...toolCall, arguments: JSON.stringify(args) });
+      const output = await executeTool({ ...toolCall, arguments: JSON.stringify(args) }, userId);
       toolOutputs.push({
         type: 'function_call_output',
         call_id: toolCall.call_id,

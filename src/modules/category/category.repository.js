@@ -2,16 +2,21 @@ import { Op } from 'sequelize';
 import { Category } from '../../models/category.model.js';
 
 class CategoryRepository {
-  async create(data) {
-    return Category.create(data);
+  async create(userId, data) {
+    return Category.create({
+      ...data,
+      id_user: userId,
+    });
   }
 
-  async findById(id) {
-    return Category.findByPk(id);
+  async findById(userId, id) {
+    return Category.findOne({ where: { id, id_user: userId } });
   }
 
-  async findAllPaginated(filters, { limit, offset }) {
+  async findAllPaginated(userId, filters, { limit, offset }) {
     const where = {};
+
+    where.id_user = userId;
 
     if (filters.name) {
       where.name = { [Op.iLike]: `%${filters.name}%` };
@@ -29,8 +34,8 @@ class CategoryRepository {
     });
   }
 
-  async update(id, data) {
-    return Category.update(data, { where: { id } });
+  async update(userId, id, data) {
+    return Category.update(data, { where: { id, id_user: userId } });
   }
 }
 
