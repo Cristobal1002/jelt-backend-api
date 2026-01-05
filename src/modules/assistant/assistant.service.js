@@ -30,7 +30,34 @@ const executeTool = async (toolCall, userId) => {
   args.userId = userId;
 
   switch (toolCall.name) {
-    case 'get_article_stock': {
+    case 'get_article_stock_by_sku': {
+      const articles = await assistantRepository.findArticleBySkuOrName(args);
+      return {
+        items: articles.map((a) => ({
+          id: a.id,
+          sku: a.sku,
+          name: a.name,
+          stock: a.stock,
+          reorder_point: a.reorder_point,
+          lead_time: a.lead_time,
+          stockroom: a.stockroom
+            ? {
+                id: a.stockroom.id,
+                name: a.stockroom.name,
+                address: a.stockroom.address,
+              }
+            : null,
+          category: a.category
+            ? { id: a.category.id, name: a.category.name }
+            : null,
+          supplier: a.supplier
+            ? { id: a.supplier.id, name: a.supplier.name }
+            : null,
+        })),
+      };
+    }
+
+    case 'get_article_stock_by_name': {
       const articles = await assistantRepository.findArticleBySkuOrName(args);
       return {
         items: articles.map((a) => ({
@@ -218,6 +245,8 @@ const chat = async ({ userMessage, userId }) => {
     for (const toolCall of toolCalls) {
       usedTools.add(toolCall.name);
       const args = safeParseArgs(toolCall);
+
+      console.log('Executing tool:', toolCall.name, 'with args:', args);
 
       const output = await executeTool({ ...toolCall, arguments: JSON.stringify(args) }, userId);
       toolOutputs.push({

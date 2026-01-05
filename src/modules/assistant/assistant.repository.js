@@ -66,7 +66,7 @@ class AssistantRepository {
         {
           model: Stockroom,
           as: 'stockroom',
-          attributes: ['id', 'name', 'address', 'city', 'country'],
+          attributes: ['id', 'name', 'address'],
         },
       ],
       group: ['id_stockroom', 'stockroom.id'],

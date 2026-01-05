@@ -1,16 +1,29 @@
 export const assistantTools = [
   {
     type: 'function',
-    name: 'get_article_stock',
+    name: 'get_article_stock_by_sku',
     description:
-      'Obtiene información de stock de artículos por SKU o nombre. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico.',
+      'Obtiene información de stock de artículos por SKU. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico por SKU.',
     parameters: {
       type: 'object',
       properties: {
         sku: {
           type: 'string',
-          description: 'SKU exacto del artículo. Opcional si se usa nombre.',
-        },
+          description: 'SKU exacto del artículo',
+        }
+      },
+      additionalProperties: false,
+    },
+    //strict: true,
+  },
+  {
+    type: 'function',
+    name: 'get_article_stock_by_name',
+    description:
+      'Obtiene información de stock de artículos por nombre. Úsalo cuando el usuario pregunte por la existencia o stock de un artículo específico por nombre.',
+    parameters: {
+      type: 'object',
+      properties: {
         name: {
           type: 'string',
           description: 'Nombre (o parte del nombre) del artículo.',
@@ -18,7 +31,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -41,7 +54,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -53,7 +66,7 @@ export const assistantTools = [
       properties: {},
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -75,7 +88,7 @@ export const assistantTools = [
         required: [],
         additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -117,7 +130,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -134,7 +147,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -150,7 +163,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -169,7 +182,7 @@ export const assistantTools = [
       },
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
   {
     type: 'function',
@@ -186,6 +199,6 @@ export const assistantTools = [
       required: ['articleId'],
       additionalProperties: false,
     },
-    strict: true,
+    //strict: true,
   },
 ];
