@@ -35,11 +35,11 @@ export class Article extends Model {
           allowNull: false,
         },
         reorder_point: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.INTEGER,  //Sirve para la aletrta de control, de stock
           allowNull: true,
         },
         lead_time: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.INTEGER, //Revisar que es esto
           allowNull: true,
           comment: 'Lead time promedio en días.',
         },
