@@ -2,8 +2,6 @@ import { Sequelize } from 'sequelize';
 import { config } from './index.js';
 import { logger } from '../utils/logger.js';
 
-const isDev = process.env.NODE_ENV !== 'production';
-
 const sqz = new Sequelize(
     config.db.name,
     config.db.user,
