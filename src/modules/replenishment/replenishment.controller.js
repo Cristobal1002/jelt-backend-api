@@ -3,8 +3,11 @@ import { replenishmentService } from './replenishment.service.js';
 const getByArticleId = async (req, res, next) => {
   try {
     const { articleId } = req.params;
+    
+    const userId = req.user?.id || null;
 
     const data = await replenishmentService.getArticleReplenishmentById(
+      userId,
       articleId
     );
 
@@ -24,8 +27,8 @@ const getByArticleId = async (req, res, next) => {
 const getBySku = async (req, res, next) => {
   try {
     const { sku } = req.params;
-
-    const data = await replenishmentService.getArticleReplenishmentBySku(sku);
+    const userId = req.user?.id || null;
+    const data = await replenishmentService.getArticleReplenishmentBySku(userId, sku);
 
     if (!data) {
       const error = new Error('Artículo no encontrado');

@@ -40,14 +40,14 @@ const mapReorderSuggestionToDto = (result) => {
   };
 };
 
-const getArticleReplenishmentById = async (articleId) => {
-  const result = await assistantRepository.getReorderSuggestion({ articleId });
+const getArticleReplenishmentById = async (userId, articleId) => {
+  const result = await assistantRepository.getReorderSuggestion({ articleId, userId });
   if (!result) return null;
   return mapReorderSuggestionToDto(result);
 };
 
-const getArticleReplenishmentBySku = async (sku) => {
-  const result = await assistantRepository.getReorderSuggestion({ sku });
+const getArticleReplenishmentBySku = async (userId, sku) => {
+  const result = await assistantRepository.getReorderSuggestion({ sku, userId });
   if (!result) return null;
   return mapReorderSuggestionToDto(result);
 };
