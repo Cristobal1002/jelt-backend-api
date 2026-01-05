@@ -5,6 +5,7 @@
  *   description: >
  *      El módulo **Auth** gestiona todo lo relacionado con la autenticación y autorización de usuarios.
  *      Este módulo garantiza que solo usuarios autenticados y con los permisos adecuados puedan acceder a los recursos protegidos de la API.
+ *      El registro externo define los roles iniciales del sistema: **USER**. Solo los permisos de  **ADMIN** y **SUPER_ADMIN** serán definidos desde la administracion base del sistema.
  *      <br/>Permite:
  *      <ul><li>Registrar nuevos usuarios en el sistema.</li>
  *      <li>Iniciar sesión (login) con email y contraseña.</li>
