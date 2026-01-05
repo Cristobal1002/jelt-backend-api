@@ -4,7 +4,8 @@ class InventoryHistoryController {
   // Sales
   createSale = async (req, res, next) => {
     try {
-      const sale = await inventoryHistoryService.createSale(req.body);
+      const userId = req.user?.id || null;
+      const sale = await inventoryHistoryService.createSale(userId, req.body);
       res.status(201).json(sale);
     } catch (err) {
       next(err);
@@ -13,7 +14,8 @@ class InventoryHistoryController {
 
   listSales = async (req, res, next) => {
     try {
-      const data = await inventoryHistoryService.listSales(req.query);
+      const userId = req.user?.id || null;
+      const data = await inventoryHistoryService.listSales(userId, req.query);
       res.json(data);
     } catch (err) {
       next(err);
@@ -22,7 +24,8 @@ class InventoryHistoryController {
 
   salesSummary = async (req, res, next) => {
     try {
-      const data = await inventoryHistoryService.salesSummary(req.query);
+      const userId = req.user?.id || null;
+      const data = await inventoryHistoryService.salesSummary(userId, req.query);
       res.json(data);
     } catch (err) {
       next(err);
@@ -31,7 +34,8 @@ class InventoryHistoryController {
 
   topSelling = async (req, res, next) => {
     try {
-      const data = await inventoryHistoryService.topSelling(req.query);
+      const userId = req.user?.id || null;
+      const data = await inventoryHistoryService.topSelling(userId, req.query);
       res.json(data);
     } catch (err) {
       next(err);
@@ -41,7 +45,8 @@ class InventoryHistoryController {
   // Movements
   createMovement = async (req, res, next) => {
     try {
-      const mov = await inventoryHistoryService.createMovement(req.body);
+      const userId = req.user?.id || null;
+      const mov = await inventoryHistoryService.createMovement(userId, req.body);
       res.status(201).json(mov);
     } catch (err) {
       next(err);
@@ -50,7 +55,8 @@ class InventoryHistoryController {
 
   listMovements = async (req, res, next) => {
     try {
-      const data = await inventoryHistoryService.listMovements(req.query);
+      const userId = req.user?.id || null;
+      const data = await inventoryHistoryService.listMovements(userId, req.query);
       res.json(data);
     } catch (err) {
       next(err);
@@ -59,7 +65,8 @@ class InventoryHistoryController {
 
   movementSummary = async (req, res, next) => {
     try {
-      const data = await inventoryHistoryService.movementSummary(req.query);
+      const userId = req.user?.id || null;
+      const data = await inventoryHistoryService.movementSummary(userId, req.query);
       res.json(data);
     } catch (err) {
       next(err);

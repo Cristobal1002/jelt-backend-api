@@ -15,12 +15,13 @@ class InventoryHistoryRepository {
   // -------------------------
   // Sales history CRUD
   // -------------------------
-  async createSale(payload) {
-    return SalesHistory.create(payload);
+  async createSale(userId, payload) {
+    return SalesHistory.create({ ...payload, id_user: userId });
   }
 
-  async listSales({ articleId, stockroomId, from, to, limit = 50, offset = 0 }) {
-    const where = { isDelete: false };
+  async listSales(userId, { articleId, stockroomId, from, to, limit = 50, offset = 0 }) {
+    const where = { isDelete: false, id_user: userId };
+    
     if (articleId) where.id_article = articleId;
     if (stockroomId) where.id_stockroom = stockroomId;
 
@@ -41,8 +42,9 @@ class InventoryHistoryRepository {
     return { rows, count, limit, offset };
   }
 
-  async getSalesSummary({ articleId, stockroomId, from, to }) {
-    const where = { isDelete: false };
+  async getSalesSummary(userId, { articleId, stockroomId, from, to }) {
+    const where = { isDelete: false, id_user: userId };
+
     if (articleId) where.id_article = articleId;
     if (stockroomId) where.id_stockroom = stockroomId;
 
@@ -68,14 +70,16 @@ class InventoryHistoryRepository {
     };
   }
 
-  async getAverageDailySales({ articleId, stockroomId, days = 30 }) {
+  async getAverageDailySales(userId, { articleId, stockroomId, days = 30 }) {
     const from = new Date();
     from.setDate(from.getDate() - Number(days));
 
     const where = {
       isDelete: false,
       sold_at: { [Op.gte]: from },
+      id_user: userId
     };
+
     if (articleId) where.id_article = articleId;
     if (stockroomId) where.id_stockroom = stockroomId;
 
@@ -92,13 +96,14 @@ class InventoryHistoryRepository {
     return { window_days: Number(days), units_sold: units, avg_daily_units: avg };
   }
 
-  async getTopSellingArticles({ stockroomId, days = 30, limit = 10 }) {
+  async getTopSellingArticles(userId, { stockroomId, days = 30, limit = 10 }) {
     const from = new Date();
     from.setDate(from.getDate() - Number(days));
 
     const where = {
       isDelete: false,
       sold_at: { [Op.gte]: from },
+      id_user: userId,
     };
     if (stockroomId) where.id_stockroom = stockroomId;
 
@@ -125,11 +130,11 @@ class InventoryHistoryRepository {
   // -------------------------
   // Stock movements CRUD
   // -------------------------
-  async createMovement(payload) {
-    return StockMovement.create(payload);
+  async createMovement(userId, payload) {
+    return StockMovement.create({ ...payload, id_user: userId });
   }
 
-  async listMovements({
+  async listMovements(userId, {
     articleId,
     stockroomId,
     type,
@@ -138,7 +143,7 @@ class InventoryHistoryRepository {
     limit = 50,
     offset = 0,
   }) {
-    const where = { isDelete: false };
+    const where = { isDelete: false, id_user: userId };
     if (articleId) where.id_article = articleId;
     if (stockroomId) where.id_stockroom = stockroomId;
     if (type) where.type = type;
@@ -160,8 +165,8 @@ class InventoryHistoryRepository {
     return { rows, count, limit, offset };
   }
 
-  async getMovementSummary({ articleId, stockroomId, from, to }) {
-    const where = { isDelete: false };
+  async getMovementSummary(userId, { articleId, stockroomId, from, to }) {
+    const where = { isDelete: false, id_user: userId };
     if (articleId) where.id_article = articleId;
     if (stockroomId) where.id_stockroom = stockroomId;
 
@@ -193,13 +198,13 @@ class InventoryHistoryRepository {
   // -------------------------
   // Assistant analytics helpers
   // -------------------------
-  async predictStockoutDate({ articleId, stockroomId, days = 30 }) {
+  async predictStockoutDate(userId, { articleId, stockroomId, days = 30 }) {
     if (!articleId) throw new Error('articleId is required');
 
-    const article = await Article.findByPk(articleId);
+    const article = await Article.findOne({where: { id: articleId, isDelete: false, id_user: userId }});
     if (!article) return null;
 
-    const avg = await this.getAverageDailySales({ articleId, stockroomId, days });
+    const avg = await this.getAverageDailySales(userId, { articleId, stockroomId, days });
     const rate = Number(avg.avg_daily_units ?? 0);
 
     const stock = Number(article.stock ?? 0);

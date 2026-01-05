@@ -1,32 +1,32 @@
 import { inventoryHistoryRepository } from './inventory-history.repository.js';
 
 class InventoryHistoryService {
-  async createSale(payload) {
-    return inventoryHistoryRepository.createSale(payload);
+  async createSale(userId, payload) {
+    return inventoryHistoryRepository.createSale(userId, payload);
   }
 
-  async listSales(query) {
-    return inventoryHistoryRepository.listSales(query);
+  async listSales(userId, query) {
+    return inventoryHistoryRepository.listSales(userId, query);
   }
 
-  async salesSummary(query) {
-    return inventoryHistoryRepository.getSalesSummary(query);
+  async salesSummary(userId, query) {
+    return inventoryHistoryRepository.getSalesSummary(userId, query);
   }
 
-  async topSelling(query) {
-    return inventoryHistoryRepository.getTopSellingArticles(query);
+  async topSelling(userId, query) {
+    return inventoryHistoryRepository.getTopSellingArticles(userId, query);
   }
 
-  async createMovement(payload) {
-    return inventoryHistoryRepository.createMovement(payload);
+  async createMovement(userId, payload) {
+    return inventoryHistoryRepository.createMovement(userId, payload);
   }
 
-  async listMovements(query) {
-    return inventoryHistoryRepository.listMovements(query);
+  async listMovements(userId, query) {
+    return inventoryHistoryRepository.listMovements(userId, query);
   }
 
-  async movementSummary(query) {
-    return inventoryHistoryRepository.getMovementSummary(query);
+  async movementSummary(userId, query) {
+    return inventoryHistoryRepository.getMovementSummary(userId, query);
   }
 }
 
