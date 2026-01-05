@@ -9,6 +9,10 @@ export class Category extends Model {
           primaryKey: true,
           defaultValue: DataTypes.UUIDV4,
         },
+        id_user: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
         name: {
           type: DataTypes.STRING,
           allowNull: false,

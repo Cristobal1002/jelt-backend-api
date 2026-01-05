@@ -2,13 +2,22 @@ import { articleRepository } from './article.repository.js';
 import { buildPagination, buildMeta } from '../../utils/pagination.js';
 import { BadRequestError, NotFoundError } from '../../errors/http.error.js';
 
-const create = async (data) => {
+const create = async (userId, data) => {
   // Todas las validaciones de formato se hacen en el validator
-  const article = await articleRepository.create(data);
+  if (!userId) {
+    throw new BadRequestError('Action denied for user');
+  }
+
+  const article = await articleRepository.create(userId, data);
+
   return article;
 };
 
-const list = async (query) => {
+const list = async (userId, query) => {
+  if (!userId) {
+    throw new BadRequestError('Action denied for user');
+  }
+
   const { page, perPage, id, sku, name, priceGt, priceLt, priceMin, priceMax } =
     query;
 
@@ -25,6 +34,7 @@ const list = async (query) => {
   };
 
   const { rows, count } = await articleRepository.findAllPaginated(
+    userId,
     filters,
     pagination
   );
@@ -39,12 +49,16 @@ const list = async (query) => {
   };
 };
 
-const getById = async (id) => {
+const getById = async (userId, id) => {
+  if (!userId) {
+    throw new BadRequestError('Action denied for user');
+  }
+
   if (!id) {
     throw new BadRequestError('Id is required');
   }
 
-  const article = await articleRepository.findById(id);
+  const article = await articleRepository.findById(userId, id);
   if (!article) {
     throw new NotFoundError('Article not found');
   }
@@ -52,25 +66,33 @@ const getById = async (id) => {
   return article;
 };
 
-const update = async (id, data) => {
+const update = async (userId, id, data) => {
+  if (!userId) {
+    throw new BadRequestError('Action denied for user');
+  }
+
   if (!id) {
     throw new BadRequestError('Id is required');
   }
 
-  const [affected] = await articleRepository.update(id, data);
+  const [affected] = await articleRepository.update(userId, id, data);
   if (!affected) {
     throw new NotFoundError('Article not found');
   }
 
-  return articleRepository.findById(id);
+  return articleRepository.findById(userId, id);
 };
 
-const softDelete = async (id) => {
+const softDelete = async (userId, id) => {
+  if (!userId) {
+    throw new BadRequestError('Action denied for user');
+  }
+
   if (!id) {
     throw new BadRequestError('Id is required');
   }
 
-  const [affected] = await articleRepository.softDelete(id);
+  const [affected] = await articleRepository.softDelete(userId, id);
   if (!affected) {
     throw new NotFoundError('Article not found');
   }

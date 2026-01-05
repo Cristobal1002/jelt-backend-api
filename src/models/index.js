@@ -35,4 +35,19 @@ export const initModels = (sequelize) => {
   SalesHistory.associate({ Article, Stockroom });
   StockMovement.associate({ Article, Stockroom });
 
+  // Identificar registros por usuario
+  User.hasMany(Article, { foreignKey: 'id_user' });
+  Article.belongsTo(User, { foreignKey: 'id_user' });
+
+  User.hasMany(Category, { foreignKey: 'id_user' });
+  Category.belongsTo(User, { foreignKey: 'id_user' });
+
+  User.hasMany(Stockroom, { foreignKey: 'id_user' });
+  Stockroom.belongsTo(User, { foreignKey: 'id_user' });
+
+  User.hasMany(SalesHistory, { foreignKey: 'id_user' });
+  SalesHistory.belongsTo(User, { foreignKey: 'id_user' });
+
+  User.hasMany(StockMovement, { foreignKey: 'id_user' });
+  StockMovement.belongsTo(User, { foreignKey: 'id_user' });
 };
