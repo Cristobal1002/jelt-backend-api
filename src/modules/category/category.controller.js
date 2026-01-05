@@ -30,8 +30,19 @@ const getById = async (req, res, next) => {
   }
 };
 
+const update = async (req, res, next) => {
+  try {
+    const userId = req.user?.id || null;
+    const category = await categoryService.update(userId, req.params.id, req.body);
+    return res.ok(category, 'Category updated successfully');
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const categoryController = {
   create,
   list,
-  getById
+  getById,
+  update
 };

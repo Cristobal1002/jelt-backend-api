@@ -43,8 +43,18 @@ const getById = async (userId, id) => {
   return supplier;
 };
 
+const update = async (userId, id, data) => {
+  if (!id) throw new BadRequestError('Id is required');
+
+  const [affected] = await categoryRepository.update(userId, id, data);
+  if (!affected) throw new NotFoundError('Controller not found');
+
+  return categoryRepository.findById(userId, id);
+};
+
 export const categoryService = {
   create,
   list,
-  getById
+  getById,
+  update
 };
