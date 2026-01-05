@@ -10,7 +10,7 @@ export class SalesHistory extends Model {
           defaultValue: DataTypes.UUIDV4,
         },
         id_user: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
         },
         id_article: {
