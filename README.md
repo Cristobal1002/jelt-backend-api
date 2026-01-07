@@ -232,3 +232,206 @@ flowchart TB
     HEALTH_R -.-> RESPONSE_MW
     HEALTH_R -.-> ERROR_MW
 ```
+
+## Funcionalidad de Assistant o Chat BOT integrado con OPENAI
+
+## Configuración
+
+Variables de entorno que son utilizadas como parte de la configuración de integración con OPENAI. Si `AI_ENABLED` no se configura o esta en `false` la funcionalidad de del chat no estará disponible.
+
+La variable de entorno `OPENAI_API_KEY` se configura a partir del api key desde el panel de control de openai, visite la pagina de "https://platform.openai.com/settings/organization/api-keys"
+
+La variable de entorno `OPENAI_MODEL` se debe indicar el modelo de OPENAI, visite la pagina oficial para indicar el valor que mejor convenga para los casos de uso, por defecto se puede utilizar un modelo como gpt-4.1-mini 
+
+```
+AI_ENABLED=true
+OPENAI_API_KEY=llave_open_ai_valida
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+**la implementación actual del assistant** (consultas, IA + tools, multi-tenant por `id_user`, creación de entidades, inventario, historial, stock, etc.), **estas son preguntas/órdenes reales que es posible enviarle** al endpoint:
+
+```
+Chatbot de IA para consultas de inventario.
+Para 'conversationId' el campo que debería contener el ID de la conversación previa para contextos continuos. Si es nulo, se inicia una nueva conversación.
+
+POST /assistant/chat
+{ "message": "..." }
+```
+
+**casos de uso**, considenrado lo qué cubre hoy el assistant.
+
+---
+
+# CONSULTAS DE INVENTARIO
+
+### Existencia / stock
+
+* **“¿Qué artículos existen en el inventario?”**
+* **“¿Qué artículos existen en el inventario de aspirina?”**
+* **“Muéstrame el stock actual de la aspirina”**
+* **“¿Cuánto stock hay del SKU ASP-500?”**
+* **“¿En qué almacenes hay aspirina disponible?”**
+* **“Dame la distribución de stock del artículo ibuprofeno por almacén”**
+
+---
+
+### Bajo stock / reorden
+
+* **“¿Qué artículos tienen bajo stock?”**
+* **“¿Qué productos están por debajo del punto de reorden?”**
+* **“Muéstrame los artículos que están próximos a agotarse”**
+* **“Sugiere reorden para el SKU ASP-500”**
+* **“¿Cuánto debería reordenar del artículo ibuprofeno?”**
+
+Aquí el assistant usa:
+
+* demanda promedio
+* desviación
+* lead time
+* service level
+  (todo lo que esta implementado en repositorios)
+
+---
+
+### Historial de inventario
+
+* **“Muéstrame el historial de movimientos del artículo aspirina”**
+* **“¿Qué movimientos de stock tuvo el artículo 10 en los últimos 7 días?”**
+* **“Ventas del artículo ibuprofeno en el último mes”**
+* **“¿Cuántas unidades se vendieron de aspirina la semana pasada?”**
+* **“Historial de ventas del SKU ASP-500 entre enero y febrero”**
+
+---
+
+# CREACIÓN DE ENTIDADES
+
+## Categorías
+
+### Con datos completos
+
+* **“Crea una categoría llamada Analgésicos”**
+* **“Registra la categoría Antibióticos con descripción Medicamentos con prescripción”**
+
+### Con datos incompletos (el assistant pregunta)
+
+* **“Crea una categoría”**
+* **“Quiero registrar una nueva categoría”**
+
+➡️ El assistant responde:
+
+> “¿Cuál es el nombre de la categoría?”
+
+---
+
+## Almacenes / Stockrooms
+
+### Con datos completos
+
+* **“Crea un almacén llamado Bodega Principal”**
+* **“Registra un stockroom llamado Farmacia Central en Calle 10 #5-20”**
+
+### Incompleto
+
+* **“Crea un almacén”**
+* **“Agrega un nuevo stockroom”**
+
+➡️ El assistant pregunta por el **nombre**.
+
+---
+
+## Proveedores (globales)
+
+### Completo
+
+* **“Registra un proveedor llamado ACME Pharma con NIT 900123456”**
+* **“Crea el proveedor Bayer con NIT 800999888 y teléfono 3001234567”**
+* **“Agrega proveedor Pfizer NIT 900111222 dirección Calle 20”**
+
+### Incompleto
+
+* **“Crea un proveedor”**
+* **“Registra un proveedor llamado ACME”**
+
+➡️ El assistant responde:
+
+> “Para crear el proveedor necesito el nombre y el NIT. ¿Me los indicas?”
+
+---
+
+# CONSULTAS COMBINADAS / NATURALES
+
+Estas son frases “humanas” que el assistant **ya puede interpretar correctamente**:
+
+* **“¿Qué artículos de analgésicos tienen bajo stock?”**
+* **“¿Hay aspirina disponible en la bodega principal?”**
+* **“Muéstrame los productos con mayor rotación”**
+* **“¿Qué artículos debería reordenar esta semana?”**
+* **“Dame un resumen del estado del inventario”**
+* **“¿Qué productos se han vendido más en los últimos 30 días?”**
+
+---
+
+# CONSIDERACIONES
+
+Estas preguntas:
+
+* **solo devuelven datos del usuario autenticado**
+* **no exponen `id_user`**
+* **no mezclan inventarios entre usuarios**
+
+Ejemplo:
+
+* Dos usuarios preguntan *“¿Qué artículos existen?”*
+  ➡️ Cada uno ve **solo su inventario**
+
+---
+
+# Resumen rápido
+
+Con la implementación actual, el assistant **ya funciona como**:
+
+```
+✅ Consultor de inventario
+✅ Detector de bajo stock
+✅ Asistente de reorden
+✅ Analista de historial
+✅ Creador guiado de categorías
+✅ Creador guiado de almacenes
+✅ Creador guiado de proveedores
+✅ Multi-tenant seguro
+```
+
+---
+
+### Ejemplos de mensajes
+
+#### Intereacciones con el agente
+```
+{ "message": "Crea una categoría" }
+{ "message": "Crea una categoría llamada Analgésicos" }
+{ "message": "Crea un almacén llamado Bodega Principal en la dirección Calle 1 #1-11" }
+{ "message": "Crea un proveedor llamado Proveedor 1 con NIT 900123456" }
+{ "message": "Registra un proveedor llamado ACME Pharma con NIT 900123456, teléfono 3001234567" }
+{ "message": "¿Qué artículos existen en el inventario de aspirina?" }
+```
+
+#### Intereacciones con el agente
+
+Request:
+```
+{ "message": "Crea una categoría llamada Inyectables" }
+```
+
+Response:
+```
+{
+    "data": {
+        "reply": "He creado la categoría \"Inyectables\". ¿Quieres agregar una descripción o realizar alguna otra acción?",
+        "usedTools": [
+        "create_category"
+        ]
+    },
+    "conversationId": "4d48ddb7-be9f-4e50-825b-3e3b6aa84ab4"
+}
+```
