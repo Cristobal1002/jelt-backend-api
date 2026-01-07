@@ -8,7 +8,7 @@ const chat = async (req, res, next) => {
     const result = await assistantService.chat({
       userMessage: message,
       userId,
-      conversationId: conversationId ?? null,
+      conversationId: conversationId ?? userId,
     });
 
     return res.ok(
