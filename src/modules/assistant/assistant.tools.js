@@ -201,4 +201,54 @@ export const assistantTools = [
     },
     //strict: true,
   },
+  {
+    type: 'function',
+    name: 'create_category',
+    description:
+      'Crea una categoría. Úsala cuando el usuario pida crear/registrar una categoría y provea al menos el nombre. Si falta el nombre, pregunta antes de llamar la función.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Nombre de la categoría.' },
+        description: { type: 'string', description: 'Descripción (opcional).' },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    },
+    strict: false,
+  },
+  {
+    type: 'function',
+    name: 'create_stockroom',
+    description:
+      'Crea un almacén/stockroom. Úsala cuando el usuario pida crear un almacén y provea al menos el nombre. Si falta el nombre, pregunta antes de llamar la función.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Nombre del almacén.' },
+        address: { type: 'string', description: 'Dirección (opcional).' },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    },
+    strict: false,
+  },
+  {
+    type: 'function',
+    name: 'create_supplier',
+    description:
+      'Crea un proveedor. Úsala cuando el usuario pida crear/registrar un proveedor y provea nombre y NIT. Si falta alguno, pregunta antes de llamar la función.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Nombre del proveedor.' },
+        nit: { type: 'string', description: 'NIT único del proveedor.' },
+        address: { type: 'string', description: 'Dirección (opcional).' },
+        phone: { type: 'string', description: 'Teléfono (opcional).' },
+      },
+      required: ['name', 'nit'],
+      additionalProperties: false,
+    },
+    strict: false,
+  }
 ];

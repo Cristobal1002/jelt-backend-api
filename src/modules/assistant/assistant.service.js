@@ -5,16 +5,72 @@ import { inventoryHistoryRepository } from '../inventory-history/inventory-histo
 
 const SYSTEM_INSTRUCTIONS = `
 Eres un asistente especializado en inventario de la aplicación Jelt.
-Tu objetivo es ayudar al usuario con:
-- Consultar existencia de artículos (stock actual, almacén, categoría, proveedor).
-- Identificar artículos con bajo stock o próximos a agotarse.
-- Mostrar distribución de stock por almacén/ubicación.
+Ayudas a los usuarios a consultar y gestionar información de inventario
+de forma segura y clara.
 
-Reglas:
-- Si necesitas datos de stock, utiliza SIEMPRE las funciones disponibles (tools).
-- Explica las respuestas en español claro y conciso.
-- Si los datos devueltos por las funciones son muchos, resume los más relevantes.
+CAPACIDADES
+Puedes ayudar al usuario con:
+- Consultar existencia de artículos (stock, almacén, categoría, proveedor).
+- Identificar artículos con bajo stock o próximos a agotarse.
+- Mostrar distribución de stock por almacén.
+- Crear entidades del inventario cuando el usuario lo solicite explícitamente:
+  - Categorías
+  - Almacenes / Stockrooms
+  - Proveedores
+
+REGLAS GENERALES (MUY IMPORTANTES)
+- NO inventes datos.
+- NO asumas valores que el usuario no haya proporcionado.
+- Usa SIEMPRE las funciones disponibles (tools) para consultar o modificar datos reales.
+- Nunca inventes IDs ni valores técnicos.
+- Si falta información obligatoria para ejecutar una acción, PREGUNTA antes de usar una tool.
+- Explica las respuestas en español claro, profesional y conciso.
+- Si el resultado es muy grande, resume los datos más relevantes.
+
+REGLAS PARA CREACIÓN DE ENTIDADES
+Cuando el usuario pida crear o registrar algo, valida primero los campos obligatorios:
+
+1) Categoría (create_category)
+- Obligatorio: name
+- Opcional: description
+Si falta el nombre:
+  Pregunta: "¿Cuál es el nombre de la categoría?"
+
+2) Almacén / Stockroom (create_stockroom)
+- Obligatorio: name
+- Opcional: address
+Si falta el nombre:
+  Pregunta: "¿Cuál es el nombre del almacén?"
+
+3) Proveedor (create_supplier)
+- Obligatorio: name y nit
+- Opcional: address, phone
+Si falta alguno:
+  Pregunta SOLO por los campos obligatorios faltantes.
+  Ejemplo: "Para crear el proveedor necesito el nombre y el NIT. ¿Me los indicas?"
+
+IMPORTANTE SOBRE LAS TOOLS
+- Solo llama una tool cuando tengas TODOS los campos obligatorios.
+- Usa únicamente los parámetros definidos en el schema de la tool.
+- No agregues propiedades adicionales.
+- Si el usuario no ha dado la información mínima requerida, primero pregunta.
+
+SEGURIDAD Y CONTEXTO DE USUARIO
+- Todos los datos de inventario pertenecen al usuario autenticado.
+- No menciones ni expongas información técnica como id_user.
+- Asume que categorías y almacenes pueden existir previamente y reutilízalos si corresponde.
+
+FORMATO DE RESPUESTA
+- Si se crea una entidad: confirma claramente qué se creó y muestra los datos principales.
+- Si se consulta información: muestra resultados claros y fáciles de entender.
+- Si necesitas datos adicionales: haz una pregunta breve, directa y específica.
+
+Ejemplos de buenas respuestas:
+- "He creado la categoría 'Analgésicos'."
+- "Estos artículos tienen bajo stock:"
+- "Para continuar necesito el nombre del almacén."
 `;
+
 
 const safeParseArgs = (toolCall) => {
   if (!toolCall.arguments) return {};
@@ -213,6 +269,57 @@ const executeTool = async (toolCall, userId) => {
     case 'predict_stockout_date': {
       const res = await inventoryHistoryRepository.predictStockoutDate(args);
       return res;
+    }
+
+    case 'create_category': {
+      if (!userId) return { error: 'Unauthorized: missing user context' };
+
+      if (!args?.name) {
+        return { error: 'Missing required fields: name' };
+      }
+
+      const { name, description } = args;
+      const category = await assistantRepository.createCategoryForUser(userId, { name, description });
+      return {
+        created: true,
+        category: { id: category.id, name: category.name, description: category.description ?? null },
+      };
+    }
+
+    case 'create_stockroom': {
+      if (!userId) return { error: 'Unauthorized: missing user context' };
+
+      if (!args?.name) {
+        return { error: 'Missing required fields: name' };
+      }
+      
+      const { name, address } = args;
+      const stockroom = await assistantRepository.createStockroomForUser(userId, { name, address });
+      return {
+        created: true,
+        stockroom: { id: stockroom.id, name: stockroom.name, address: stockroom.address ?? null },
+      };
+    }
+
+    case 'create_supplier': {
+
+      if (!args?.name || !args?.nit) {
+        return { error: 'Missing required fields: name, nit' };
+      }
+
+      const { name, nit, address, phone } = args;
+      const result = await assistantRepository.createSupplier({ name, nit, address, phone });
+      const supplier = result.supplier;
+      return {
+        created: result.created,
+        supplier: {
+          id: supplier.id,
+          name: supplier.name,
+          nit: supplier.nit,
+          address: supplier.address ?? null,
+          phone: supplier.phone ?? null,
+        },
+      };
     }
 
     default:
