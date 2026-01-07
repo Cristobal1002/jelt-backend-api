@@ -6,6 +6,8 @@ import { Supplier } from './supplier.model.js';
 import { Stockroom } from './stockroom.model.js';
 import { SalesHistory } from './sales-history.model.js';
 import { StockMovement } from './stock-movement.model.js';
+import { AssistantConversation } from './assistant-conversation.model.js';
+import { AssistantMessage } from './assistant-message.model.js';
 
 /**
  * Inicializa todos los modelos de Sequelize y sus relaciones
@@ -23,6 +25,8 @@ export const initModels = (sequelize) => {
   Article.initModel(sequelize);
   SalesHistory.initModel(sequelize);
   StockMovement.initModel(sequelize);
+  AssistantConversation.initModel(sequelize);
+  AssistantMessage.initModel(sequelize);
 
   // Asociaciones existentes
   User.associate({ Role });
@@ -50,4 +54,12 @@ export const initModels = (sequelize) => {
 
   User.hasMany(StockMovement, { foreignKey: 'id_user' });
   StockMovement.belongsTo(User, { foreignKey: 'id_user' });
+
+  // Assistant conversations (multi-tenant)
+  User.hasMany(AssistantConversation, { foreignKey: 'id_user' });
+  AssistantConversation.belongsTo(User, { foreignKey: 'id_user' });
+
+  AssistantConversation.hasMany(AssistantMessage, { foreignKey: 'conversation_id' });
+  AssistantMessage.belongsTo(AssistantConversation, { foreignKey: 'conversation_id' });
 };
+
