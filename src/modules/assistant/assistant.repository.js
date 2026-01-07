@@ -224,6 +224,50 @@ class AssistantRepository {
       return reorderPoint > 0 && stock <= reorderPoint;
     });
   }
+
+  async createCategoryForUser(userId, { name, description }) {
+    return Category.create({
+      id_user: userId,
+      name,
+      description: description ?? null,
+    });
+  }
+
+  async createStockroomForUser(userId, { name, address }) {
+    return Stockroom.create({
+      id_user: userId,
+      name,
+      address: address ?? null,
+    });
+  }
+
+  /**
+   * Crea un proveedor global (sin segregación por usuario).
+   * Usa findOrCreate por NIT para evitar duplicados.
+   */
+  async createSupplier({ name, nit, address, phone }) {
+    const [supplier, created] = await Supplier.findOrCreate({
+      where: { nit },
+      defaults: {
+        name,
+        nit,
+        address: address ?? null,
+        phone: phone ?? null,
+      },
+    });
+
+    // Si ya existía, opcionalmente actualizar datos no críticos
+    if (!created) {
+      const updates = {};
+      if (name && supplier.name !== name) updates.name = name;
+      if (address !== undefined) updates.address = address ?? null;
+      if (phone !== undefined) updates.phone = phone ?? null;
+      if (Object.keys(updates).length) await supplier.update(updates);
+    }
+
+    return { supplier, created };
+  }
+
 }
 
 export const assistantRepository = new AssistantRepository();
