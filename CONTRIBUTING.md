@@ -1,4 +1,4 @@
-## 1. Estructura actual del proyecto
+## 1. Estructura del proyecto
 
 Raíz:
 
@@ -6,19 +6,27 @@ Raíz:
 * `src/`
   * `server.js`
   * `config/`
+  * `constants/`
   * `loaders/`
   * `errors/`
   * `middlewares/`
   * `routes/`
-  * `modules/`
+  * `modules/{*.controller.js, *.repository.js, *.routes.js, *.service.js, *. swagger.js, *.validator.js}`
     * `article/`
+    * `assiatant/`
     * `auth/`
     * `category/`
+    * `inventory-history/`
+    * `replenishment/`
     * `stockroom/`
     * `supplier/`
   * `models/`
+    * `seed/`
+      * `*.seed.js`
+    * `*.model.js`
   * `utils/`
-  * `db.sql/`
+* `.env`
+* `.gitignore`
 
 ### Rol de cada carpeta
 
@@ -227,7 +235,7 @@ Por definicion de logica y nuevas funcionalidades se establece **arquitectura en
 
 Patrón utilizado:
 
-* **Controller → Service → Repository** bien marcado.
+* **Controller → Service → Repository**.
 * **Loader pattern** para Express y Sequelize (`loadExpress`, `loadDatabase`).
 * **Patrón de Error Customizado** siguiendo algo similar a RFC 7807.
 * Uso de **middlewares transversales** (response handler, error handler, auth, validate request).
@@ -237,7 +245,7 @@ SOLID:
 * **S (Single Responsibility)**:
   Cada archivo tiene responsabilidad clara (config, loader, controller, service, repository, middleware).
 * **D (Dependency Inversion)**:
-  Aunque no hay DI container, la dirección de dependencias es correcta:
+  Aunque no hay DI container, la dirección de dependencias esta organizada y es coherente:
 
   * Controller depende de Service.
   * Service depende de Repository y Utils.
@@ -509,7 +517,7 @@ Responsabilidades:
 
 * `config.cors.origin` por defecto es `'*'`:
 
-  * Mientras este en ambiente dev es correcto, **no recomendado para prod**. Lo ideal es restringir a dominios de front conocidos (esto se conocerá cuando se lance a PROD).
+  * Mientras este en ambiente dev es valido, **no recomendado para producción**. Lo ideal es restringir a dominios de front conocidos (esto se conocerá cuando se lance a PROD).
 
 ---
 
@@ -518,6 +526,8 @@ Responsabilidades:
 ### Implementación
 
 * **Swagger / OpenAPI**
+
+#### Tener en cuenta que esta funcioanlidad de swagger solo será visible en ambiente desarrollo o `development`
 
   * `GET /health/*` y `GET/POST/PUT/DELETE /auth/*` tienen JSDoc detallado:
 
@@ -529,26 +539,4 @@ Responsabilidades:
     * Información de la API (`title`, `version`, `description`).
     * Referencia a rutas en `routes/*.js` y `modules/**/*.routes.js`.
 
-* **README.md**
 
-  * Explica:
-
-    * Prerrequisitos (Node, npm, Postgres).
-    * Instalación básica.
-    * Variables de entorno.
-    * Scripts (`start`, `dev`, `test`, `lint`, `format`).
-    * Tecnologías usadas:
-
-      * Express, Sequelize, PostgreSQL, JWT, bcrypt, Pino, Helmet, rate-limit, express-validator.
-    * Sección de seguridad con bullets claros.
----
-
-## 9. Resumen
-
-* Proyecto **backend** en Node + Express + Sequelize, estructurado y con buenas prácticas modernas:
-
-  * Capas claras (Controller–Service–Repository).
-  * Manejo centralizado de errores y respuestas.
-  * Seguridad básica integrada (JWT, bcrypt, helmet, rate-limit).
-  * Logging con Pino.
-  * Swagger bien configurado y documentando health + auth.
