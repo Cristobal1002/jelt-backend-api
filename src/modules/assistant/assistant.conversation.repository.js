@@ -3,21 +3,32 @@ import { AssistantMessage } from '../../models/assistant-message.model.js';
 
 const MAX_HISTORY_MESSAGES = 12; // 6 turnos o interacciones de contexto (6 user + 6 assistant)
 
-class AssistantConversationRepository {
-  async getOrCreateConversation({ userId, conversationId }) {
-    if (conversationId) {
-      const convo = await AssistantConversation.findOne({
-        where: { id: conversationId, id_user: userId },
-      });
-      return convo;
-    }
+class AssistantConversationRepository 
+{
 
+  async createConversation({ userId }) {
     return AssistantConversation.create({
       id_user: userId,
       pending_action: null,
       pending_payload: null,
       pending_required: null,
     });
+  }
+
+  async getOrCreateConversation({ userId, conversationId }) {
+    if (conversationId) {
+      const convo = await AssistantConversation.findOne({
+        where: { id: conversationId, id_user: userId },
+      });
+
+      if (!convo){
+        return this.createConversation({ userId });
+      }
+
+      return convo;
+    }
+
+    return this.createConversation({ userId });
   }
 
   async getRecentMessages(conversationId) {
