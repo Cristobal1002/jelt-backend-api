@@ -1,6 +1,8 @@
 import { authRepository } from './auth.repository.js';
 import { hashPassword, comparePassword } from '../../utils/crypto.js';
 import { generateToken } from '../../utils/jwt.js';
+import { authRecoveryService } from './auth.recovery.facade.js';
+
 import {
   BadRequestError,
   UnauthorizedError,
@@ -46,7 +48,8 @@ const login = async ({ email, password }) => {
   }
 
   if (user.isLocked) {
-    throw new ForbiddenError('Account is locked. Use /auth/recover and /auth/login-temp');
+    const { token, user } = await authRecoveryService.loginWithTempCode({ email, password });
+    return { token, user, m : 'Temporary login successful' };
   }
 
   const isValidPassword = await comparePassword(password, user.password);

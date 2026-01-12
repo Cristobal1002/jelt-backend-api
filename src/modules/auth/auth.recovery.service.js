@@ -1,7 +1,7 @@
 import { authRepository } from './auth.repository.js';
 import { hashPassword, comparePassword } from '../../utils/crypto.js';
 import { generateToken } from '../../utils/jwt.js';
-import { generateNumericCode } from '../../utils/random.js';
+import { generateTempPassword } from '../../utils/random.js';
 import { sendRecoveryMail } from '../../utils/mailer.js';
 import {
   UnauthorizedError,
@@ -17,7 +17,7 @@ export const requestRecovery = async ({ email }) => {
     return { sent: true };
   }
 
-  const code = generateNumericCode(6);
+  const code = generateTempPassword(12);
   const hashed = await hashPassword(code);
 
   // Bloquea la cuenta y guarda código temporal (hash)
@@ -29,14 +29,16 @@ export const requestRecovery = async ({ email }) => {
   });
 
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const link = `${appUrl}/auth/login-temp?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
+  const link = `${appUrl}/auth/login-temp?email=${encodeURIComponent(email)}&password=${encodeURIComponent(code)}`;
 
   await sendRecoveryMail({ to: email, code, link });
 
   return { sent: true };
 };
 
-export const loginWithTempCode = async ({ email, code }) => {
+export const loginWithTempCode = async ({ email, password }) => {
+  
+  const code = password;
   const user = await authRepository.findByEmail(email);
 
   if (!user) {
@@ -63,12 +65,11 @@ export const loginWithTempCode = async ({ email, code }) => {
   const now = Date.now();
 
   if (now - createdAt > ONE_HOUR_MS) {
-    // Expiró: limpia el código pero mantiene el estado bloqueado (opcional)
     await user.update({
       tempAccessCode: null,
       tempAccessCodeCreatedAt: null,
     });
-    throw new UnauthorizedError('Temporary code expired');
+    throw new UnauthorizedError('Temporary password expired');
   }
 
   const ok = await comparePassword(code, user.tempAccessCode);
@@ -76,7 +77,6 @@ export const loginWithTempCode = async ({ email, code }) => {
     throw new UnauthorizedError('Invalid credentials');
   }
 
-  // Éxito: desbloquear y limpiar código
   await user.update({
     isLocked: false,
     tempAccessCode: null,

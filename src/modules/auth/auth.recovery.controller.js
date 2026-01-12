@@ -11,7 +11,8 @@ const requestRecovery = async (req, res, next) => {
 
 const loginTemp = async (req, res, next) => {
   try {
-    const { token, user } = await authRecoveryService.loginWithTempCode(req.body);
+    const { email, password } = req.body;
+    const { token, user } = await authRecoveryService.loginWithTempCode({ email, password });
     return res.ok({ token, user }, 'Temporary login successful');
   } catch (error) {
     return next(error);

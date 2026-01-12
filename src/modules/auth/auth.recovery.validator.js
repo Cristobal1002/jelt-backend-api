@@ -6,9 +6,9 @@ export const recoveryRequestValidator = [
 
 export const tempLoginValidator = [
   body('email').isEmail().withMessage('Email inválido'),
-  body('code')
+  body('password')
     .isString()
     .trim()
     .isLength({ min: 4, max: 12 })
-    .withMessage('Código inválido'),
+    .withMessage('Password Temporal inválido'),
 ];
