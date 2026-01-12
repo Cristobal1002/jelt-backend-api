@@ -248,6 +248,81 @@ flowchart TB
     HEALTH_R -.-> ERROR_MW
 ```
 
+## Login y Recovery password
+
+El recurso /auth/recover, realiza la validación y envio de instrucciones al correo del usuario para recuperar su cuenta por medio de un codigo temporal (que es usado como password temporarl), con una duración de una hora.
+
+```
+Request:
+/auth/recover
+JSON
+{
+    "email": "user@example.com"
+}
+
+Response:
+JSON
+{
+    "code": 200,
+    "success": true,
+    "message": "If the email exists, recovery instructions were sent",
+    "data": {
+        "sent": true
+    },
+    "error": {}
+}
+```
+
+El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp para autenticarse en el sistema y posteriormente actualziar los datos de acceso.
+
+![alt text](image.png)
+
+```
+Request
+/auth/recover
+JSON
+{ 
+    "email": "user@example.com", 
+    "code": "546229" 
+}
+
+Response
+JSON
+{
+    "code": 200,
+    "success": true,
+    "message": "Temporary login successful",
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiY2NiOTdkLWQ3MWEtNDhh._G3oI76gBbZ2Y99OCb0",
+        "user": {
+            "id": "6bccb97d-d71a-48a5-b823-a685b1595526",
+            "id_rol": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+            "name": "Usuario",
+            "email": "user@example.com",
+            "phone": "+5713058128825",
+            "address": "calle 16#00-20",
+            "isActive": true,
+            "isDelete": false,
+            "isLocked": false,
+            "lockedAt": "2026-01-12T04:27:48.225Z",
+            "tempAccessCode": null,
+            "tempAccessCodeCreatedAt": null,
+            "createdAt": "2026-01-12T03:14:24.065Z",
+            "updatedAt": "2026-01-12T04:34:04.963Z",
+            "role": {
+                "id": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+                "name": "USER",
+                "description": null,
+                "isActive": true,
+                "createdAt": "2026-01-05T05:51:33.767Z",
+                "updatedAt": "2026-01-05T05:51:33.767Z"
+            }
+        }
+    },
+    "error": {}
+}
+```
+
 ## Funcionalidad de Assistant o Chat BOT integrado con OPENAI
 
 ## Configuración
