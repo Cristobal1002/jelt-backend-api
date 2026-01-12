@@ -1,7 +1,7 @@
 // src/config/openai.js
 import OpenAI from 'openai';
 
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-nano';
 
 export const getOpenAIClient = () => {
   const enabled = process.env.AI_ENABLED !== 'false';

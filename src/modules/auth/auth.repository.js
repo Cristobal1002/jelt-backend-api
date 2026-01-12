@@ -1,4 +1,5 @@
 import { User } from '../../models/user.model.js';
+import { Role } from '../../models/role.model.js';
 
 class AuthRepository {
   async findByEmail(email) {
@@ -20,6 +21,8 @@ class AuthRepository {
   }
 
   async createUser(data) {
+    var findRole = await Role.findOne({ where: { name: data.roleName } });
+    data.id_rol = findRole.id;
     return User.create(data);
   }
 

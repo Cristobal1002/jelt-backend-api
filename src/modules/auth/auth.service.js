@@ -12,9 +12,6 @@ const DEFAULT_ROLE = 'USER';
 const register = async (data) => {
   const { email, password, name } = data;
 
-console.log("******************************************");
-  console.log(data);
-
   const existing = await authRepository.findByEmail(email);
   if (existing) {
     throw new BadRequestError('Email is already registered');
@@ -46,6 +43,10 @@ const login = async ({ email, password }) => {
 
   if (user.isDelete) {
     throw new ForbiddenError('User is deleted');
+  }
+
+  if (user.isLocked) {
+    throw new ForbiddenError('Account is locked. Use /auth/recover and /auth/login-temp');
   }
 
   const isValidPassword = await comparePassword(password, user.password);
@@ -107,7 +108,7 @@ const findByEmail = async (email, currentUser) => {
   }
 
   // Si el rol es USER, solo puede verse a sí mismo
-  if (currentUser.role?.name === 'USER' && currentUser.email !== email) {
+  if (currentUser.role?.name === DEFAULT_ROLE && currentUser.email !== email) {
     throw new ForbiddenError('You are not allowed to view other users');
   }
 
