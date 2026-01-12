@@ -1,6 +1,6 @@
-# Node - Sequelize boilerplate 
+# Node - Api JeltApp
 
-Backend de consumo para integración Siigo y comercios electrónicos.
+Backend de consumo para integración App Jelt
 
 ## 🚀 Inicio Rápido
 
@@ -84,20 +84,35 @@ npm start
 
 - `.env`
 ```bash
-DB_LOGGING=true
-DB_NAME=jelt-dev
+# Configruaciones para Base de datos
+DB_LOGGING=false
+DB_NAME=Jelt-App
 DB_HOST=localhost
 DB_USER=postgres
-DB_PASSWORD=el_password_database
+DB_PASSWORD=password_database
 DB_PORT=5432
+DB_SYNC_MODE=alter
+
+# Configruaciones generales de la aplicacion
 NODE_ENV=development
+APP_URL=http://localhost:3000
 API_VERSION=v1
 APP_NAME=Jelt
-DB_SYNC_MODE=alter
-JWT_SECRET=valor_jwt_token_secret
+JWT_SECRET=string_jwt_token_secret
+
+# Configruaciones para OPENAI, se usa para el assistant
 AI_ENABLED=true
-OPENAI_API_KEY=llave_open_ai_valida
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_API_KEY=string_open_ai_key_secret
+OPENAI_MODEL=gpt-4.1-nano
+
+# Configruaciones para correo electronico, se usa por ejemplo para recuperar contraseña
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=no-replysmtp@gmail.com
+SMTP_PASS=password de aplicacion
+SMTP_SERVICE=gmail
+MAIL_FROM="Jelt App<no-replysmtp@gmail.com>"
+SUPPORT_EMAIL="support@jelt.com"
 ```
 
 ### Base de Datos
@@ -233,6 +248,81 @@ flowchart TB
     HEALTH_R -.-> ERROR_MW
 ```
 
+## Login y Recovery password
+
+El recurso /auth/recover, realiza la validación y envio de instrucciones al correo del usuario para recuperar su cuenta por medio de un codigo temporal (que es usado como password temporarl), con una duración de una hora.
+
+```
+Request:
+/auth/recover
+JSON
+{
+    "email": "user@example.com"
+}
+
+Response:
+JSON
+{
+    "code": 200,
+    "success": true,
+    "message": "If the email exists, recovery instructions were sent",
+    "data": {
+        "sent": true
+    },
+    "error": {}
+}
+```
+
+El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp para autenticarse en el sistema y posteriormente actualziar los datos de acceso.
+
+![alt text](image.png)
+
+```
+Request
+/auth/recover
+JSON
+{ 
+    "email": "user@example.com", 
+    "code": "546229" 
+}
+
+Response
+JSON
+{
+    "code": 200,
+    "success": true,
+    "message": "Temporary login successful",
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiY2NiOTdkLWQ3MWEtNDhh._G3oI76gBbZ2Y99OCb0",
+        "user": {
+            "id": "6bccb97d-d71a-48a5-b823-a685b1595526",
+            "id_rol": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+            "name": "Usuario",
+            "email": "user@example.com",
+            "phone": "+5713058128825",
+            "address": "calle 16#00-20",
+            "isActive": true,
+            "isDelete": false,
+            "isLocked": false,
+            "lockedAt": "2026-01-12T04:27:48.225Z",
+            "tempAccessCode": null,
+            "tempAccessCodeCreatedAt": null,
+            "createdAt": "2026-01-12T03:14:24.065Z",
+            "updatedAt": "2026-01-12T04:34:04.963Z",
+            "role": {
+                "id": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+                "name": "USER",
+                "description": null,
+                "isActive": true,
+                "createdAt": "2026-01-05T05:51:33.767Z",
+                "updatedAt": "2026-01-05T05:51:33.767Z"
+            }
+        }
+    },
+    "error": {}
+}
+```
+
 ## Funcionalidad de Assistant o Chat BOT integrado con OPENAI
 
 ## Configuración
@@ -241,22 +331,27 @@ Variables de entorno que son utilizadas como parte de la configuración de integ
 
 La variable de entorno `OPENAI_API_KEY` se configura a partir del api key desde el panel de control de openai, visite la pagina de "https://platform.openai.com/settings/organization/api-keys"
 
-La variable de entorno `OPENAI_MODEL` se debe indicar el modelo de OPENAI, visite la pagina oficial para indicar el valor que mejor convenga para los casos de uso, por defecto se puede utilizar un modelo como gpt-4.1-mini 
+La variable de entorno `OPENAI_MODEL` se debe indicar el modelo de OPENAI, visite la pagina oficial para indicar el valor que mejor convenga para los casos de uso, por defecto se puede utilizar un modelo como gpt-4.1-nano 
 
 ```
 AI_ENABLED=true
-OPENAI_API_KEY=llave_open_ai_valida
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_API_KEY=string_open_ai_key_secret
+OPENAI_MODEL=gpt-4.1-nano
 ```
 
 **la implementación actual del assistant** (consultas, IA + tools, multi-tenant por `id_user`, creación de entidades, inventario, historial, stock, etc.), **estas son preguntas/órdenes reales que es posible enviarle** al endpoint:
 
 ```
 Chatbot de IA para consultas de inventario.
-Para 'conversationId' el campo que debería contener el ID de la conversación previa para contextos continuos. Si es nulo, se inicia una nueva conversación.
+Para 'conversationId' el campo que debería contener el ID de la conversación previa para contextos continuos. 
+Si es nulo, se inicia una nueva conversación.
+Por defecto se usará el identificador del usuario logeado en la aplicación
 
 POST /assistant/chat
-{ "message": "..." }
+{ 
+    "message": "Crea una categoría llamada Inyectables",
+    "conversationId": "user id interno"
+}
 ```
 
 **casos de uso**, considenrado lo qué cubre hoy el assistant.
@@ -290,7 +385,7 @@ Aquí el assistant usa:
 * desviación
 * lead time
 * service level
-  (todo lo que esta implementado en repositorios)
+  (todo lo que esta implementado en repositorios del assistant)
 
 ---
 
@@ -420,7 +515,9 @@ Con la implementación actual, el assistant **ya funciona como**:
 
 Request:
 ```
-{ "message": "Crea una categoría llamada Inyectables" }
+{ 
+    "message": "Crea una categoría llamada Inyectables" 
+}
 ```
 
 Response:

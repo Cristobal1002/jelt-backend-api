@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Recuperación de cuenta</title>
+    <style>
+      html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+      * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      a { text-decoration: none; }
+      .btn a { mso-hide: all; }
+      @media (max-width: 620px) {
+        .container { width: 100% !important; }
+        .content { padding: 18px !important; }
+        .card { padding: 18px !important; }
+        .h1 { font-size: 20px !important; line-height: 28px !important; }
+        .p { font-size: 14px !important; line-height: 22px !important; }
+        .code { font-size: 22px !important; letter-spacing: 6px !important; }
+      }
+    </style>
+  </head>
+
+  <body style="background:#f3f4f6; margin:0; padding:0;">
+    <div style="display:none; font-size:1px; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+      Usa este correo para recuperar el acceso a tu cuenta. El código expira en 1 hora.
+    </div>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f3f4f6;">
+      <tr>
+        <td align="center" style="padding: 28px 12px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="600" class="container" style="width:600px; max-width:600px;">
+            <tr>
+              <td align="left" style="padding: 0 6px 14px 6px;">
+                <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111827;">
+                  <div style="font-size:14px; opacity:0.75;"><h1>{{appName}}</h1></div>
+                  <div style="font-size:22px; font-weight:800; letter-spacing:-0.02em;">Recuperación de cuenta</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#ffffff; border-radius:16px; box-shadow: 0 10px 30px rgba(17,24,39,0.08);">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td class="card" style="padding: 26px;">
+                      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111827;">
+                        <div class="h1" style="font-size:22px; font-weight:800; line-height:30px; margin:0 0 10px 0;">
+                          ¿Olvidaste tu acceso?
+                        </div>
+
+                        <div class="p" style="font-size:15px; line-height:24px; margin:0 0 14px 0; color:#374151;">
+                          Usa el siguiente <strong>código temporal</strong> para iniciar sesión. 
+                          <br />
+                          Recuerda cambiar tu contraseña cuando inicies sesión nuevamente.
+                          <br />
+                          <span style="color:#6b7280;">Este código expira en <strong>1 hora</strong>.</span>
+                        </div>
+                        <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:14px; padding:18px; text-align:center; margin: 16px 0;">
+                          <div style="font-size:12px; color:#6b7280; margin-bottom:8px; letter-spacing:0.06em; text-transform:uppercase;">
+                            Código temporal
+                          </div>
+                          <div class="code" style="font-size:26px; font-weight:900; letter-spacing:8px; color:#111827;">
+                            {{code}}
+                          </div>
+                        </div>
+                        <!--<table role="presentation" cellpadding="0" cellspacing="0" style="margin: 10px 0 8px 0;" hidden>
+                          <tr>
+                            <td align="center" class="btn" style="background:#111827; border-radius:12px;">
+                              <a href="{{link}}"
+                                 style="display:inline-block; padding: 12px 18px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size:14px; color:#ffffff; font-weight:700;">
+                                Ingresar con enlace seguro
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        <div class="p" style="font-size:13px; line-height:20px; color:#6b7280; margin: 10px 0 0 0;" hidden>
+                          Si el botón no funciona, copia y pega este enlace en tu navegador:
+                          <div style="word-break:break-all; margin-top:6px; color:#2563eb;">
+                            <a href="{{link}}" style="color:#2563eb;">{{link}}</a>
+                          </div>
+                        </div>
+                        <hr style="border:none; border-top:1px solid #e5e7eb; margin: 18px 0;" />-->
+                        <div class="p" style="font-size:13px; line-height:20px; color:#6b7280; margin:0;">
+                          Si no solicitaste esta recuperación, puedes ignorar este mensaje.
+                          <br />
+                          Para ayuda, contáctanos en <a href="mailto:{{supportEmail}}" style="color:#2563eb;">{{supportEmail}}</a>.
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding: 14px 8px 0 8px;">
+                <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size:12px; color:#9ca3af; line-height:18px;">
+                  © {{year}} {{appName}}. Todos los derechos reservados.
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

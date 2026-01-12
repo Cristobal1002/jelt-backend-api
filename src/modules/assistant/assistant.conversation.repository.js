@@ -17,15 +17,15 @@ class AssistantConversationRepository
 
   async getOrCreateConversation({ userId, conversationId }) {
     if (conversationId) {
-      const convo = await AssistantConversation.findOne({
+      const conversacion = await AssistantConversation.findOne({
         where: { id: conversationId, id_user: userId },
       });
 
-      if (!convo){
+      if (!conversacion){
         return this.createConversation({ userId });
       }
 
-      return convo;
+      return conversacion;
     }
 
     return this.createConversation({ userId });

@@ -21,12 +21,25 @@ export class User extends Model {
 
         isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
         isDelete: { type: DataTypes.BOOLEAN, defaultValue: false },
+
+        isLocked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        lockedAt: { type: DataTypes.DATE, allowNull: true },
+        tempAccessCode: { type: DataTypes.STRING, allowNull: true },
+        tempAccessCodeCreatedAt: { type: DataTypes.DATE, allowNull: true },
       },
       {
         sequelize,
         modelName: 'User',
         tableName: 'users',
         timestamps: true,
+        hooks: {
+          beforeSave: (user) => {
+            // Fecha automática cuando se inserta/cambia el código temporal
+            if (user.changed('tempAccessCode')) {
+              user.tempAccessCodeCreatedAt = user.tempAccessCode ? new Date() : null;
+            }
+          },
+        },
       }
     );
   }
