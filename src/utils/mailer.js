@@ -21,7 +21,7 @@ function buildTransporter() {
 
 export async function sendRecoveryMail({ to, code, link }) {
   if (process.env.MAIL_DEBUG === 'true') {
-    logger.info({ to, code, link }, '[MAIL_DEBUG] Recovery email payload');
+    logger.info({ to, code }, '[MAIL_DEBUG] Recovery email payload');
     return;
   }
 

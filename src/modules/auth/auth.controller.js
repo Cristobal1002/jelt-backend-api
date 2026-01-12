@@ -11,8 +11,8 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const { token, user } = await authService.login(req.body);
-    return res.ok({ token, user }, 'Login successful');
+    const { token, user, m } = await authService.login(req.body);
+    return res.ok({ token, user, m }, 'Login successful');
   } catch (error) {
     return next(error);
   }

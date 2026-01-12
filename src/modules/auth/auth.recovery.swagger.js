@@ -98,9 +98,9 @@
  *                 type: string
  *                 format: email
  *                 example: usuario@dominio.com
- *               code:
+ *               password:
  *                 type: string
- *                 description: Código temporal recibido por correo
+ *                 description: Código temporal recibido por correo (sirve como password temporal)
  *                 example: "123456"
  *     responses:
  *       200:

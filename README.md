@@ -252,6 +252,8 @@ flowchart TB
 
 El recurso /auth/recover, realiza la validación y envio de instrucciones al correo del usuario para recuperar su cuenta por medio de un codigo temporal (que es usado como password temporarl), con una duración de una hora.
 
+Para cuentas de Gmail debera configurar una nueva contarseña de Aplicacion desde https://myaccount.google.com/u/3/apppasswords, deberá tener habilitado la autenticación de doble factor previamente
+
 ```
 Request:
 /auth/recover
@@ -275,7 +277,7 @@ JSON
 
 El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp para autenticarse en el sistema y posteriormente actualziar los datos de acceso.
 
-![alt text](image.png)
+![Ejemplo de mensaje con codigo temporal que podra usar como contraseña (solo sirve para un único uso)](image.png)
 
 ```
 Request
