@@ -275,17 +275,18 @@ JSON
 }
 ```
 
-El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp para autenticarse en el sistema y posteriormente actualziar los datos de acceso.
+El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp ó /auth/login para autenticarse en el sistema y posteriormente actualziar los datos de acceso, el codigo temporal es de un solo uso y maximo dentro de una hora.
 
 ![Ejemplo de mensaje con codigo temporal que podra usar como contraseña (solo sirve para un único uso)](image.png)
 
 ```
 Request
-/auth/recover
+/auth/login-temp
+/auth/login
 JSON
 { 
     "email": "user@example.com", 
-    "code": "546229" 
+    "password": "xlE+Q^V#rd-x" 
 }
 
 Response
@@ -297,8 +298,8 @@ JSON
     "data": {
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiY2NiOTdkLWQ3MWEtNDhh._G3oI76gBbZ2Y99OCb0",
         "user": {
-            "id": "6bccb97d-d71a-48a5-b823-a685b1595526",
-            "id_rol": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+            "id": "6bccb97d-d71a-48a5",
+            "id_rol": "1e2ce9b1-5581-4233ed",
             "name": "Usuario",
             "email": "user@example.com",
             "phone": "+5713058128825",
@@ -312,14 +313,15 @@ JSON
             "createdAt": "2026-01-12T03:14:24.065Z",
             "updatedAt": "2026-01-12T04:34:04.963Z",
             "role": {
-                "id": "1e2ce9b1-5581-4a39-8a2b-f6a0304233ed",
+                "id": "1e2ce9b1-5581-4233ed",
                 "name": "USER",
                 "description": null,
                 "isActive": true,
                 "createdAt": "2026-01-05T05:51:33.767Z",
                 "updatedAt": "2026-01-05T05:51:33.767Z"
             }
-        }
+        },
+        "m" : "Temporary login successful"
     },
     "error": {}
 }
