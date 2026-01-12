@@ -277,7 +277,7 @@ JSON
 
 El usuario verifica en su correo electronico. Una vez que sea recibido el codigo temporal debera usar el recurso /auth/login-temp para autenticarse en el sistema y posteriormente actualziar los datos de acceso.
 
-![alt text](image.png)
+![Ejemplo de mensaje con codigo temporal que podra usar como contraseña (solo sirve para un único uso)](image.png)
 
 ```
 Request
