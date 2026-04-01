@@ -60,6 +60,7 @@ const login = async ({ email, password }) => {
   const token = generateToken({
     id: user.id,
     email: user.email,
+    name: user.name,
     role: user.role?.name,
   });
 
@@ -138,6 +139,16 @@ const findById = async (id, currentUser) => {
   return user;
 };
 
+/** Usuario actual para GET /validate-token (datos reales en BD, sirve con JWT antiguos sin `name`). */
+const getSessionUserForToken = async (decoded) => {
+  const user = await authRepository.findById(decoded.id);
+  if (!user || user.isDelete || !user.isActive) {
+    throw new UnauthorizedError('Invalid session');
+  }
+  delete user.dataValues.password;
+  return user;
+};
+
 export const authService = {
   register,
   login,
@@ -145,4 +156,5 @@ export const authService = {
   deleteUser,
   findByEmail,
   findById,
+  getSessionUserForToken,
 };

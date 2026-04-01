@@ -61,7 +61,8 @@ const getById = async (req, res, next) => {
 
 const validateToken = async (req, res, next) => {
   try {
-    return res.ok({ user: req.user }, 'Token is valid');
+    const user = await authService.getSessionUserForToken(req.user);
+    return res.ok({ user }, 'Token is valid');
   } catch (error) {
     return next(error);
   }

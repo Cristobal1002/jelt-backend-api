@@ -86,6 +86,7 @@ export const loginWithTempCode = async ({ email, password }) => {
   const token = generateToken({
     id: user.id,
     email: user.email,
+    name: user.name,
     role: user.role?.name,
     mustChangePassword: true,
     tempLogin: true,
