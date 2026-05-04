@@ -1,8 +1,11 @@
 import * as dotenv from 'dotenv';
-dotenv.config();
-
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { startServer } from './src/server.js';
 import { logger } from './src/utils/logger.js';
+
+const __appDir = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__appDir, '.env') });
 
 process.on('uncaughtException', (err) => {
   logger.fatal({ err }, 'Uncaught Exception');

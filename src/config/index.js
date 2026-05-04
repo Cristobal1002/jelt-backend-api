@@ -1,6 +1,25 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-dotenv.config();
+const __configDir = path.dirname(fileURLToPath(import.meta.url));
+/** Siempre el .env del paquete backend (no depende del cwd desde donde ejecutes node/nodemon). */
+const envPath = path.join(__configDir, '..', '..', '.env');
+dotenv.config({ path: envPath });
+
+/** Quita espacios y comillas envolventes típicas al copiar desde un gestor de secretos o IDE */
+const envStr = (key) => {
+  const raw = process.env[key];
+  if (raw == null || raw === '') return raw;
+  let v = String(raw).trim();
+  if (
+    (v.startsWith('"') && v.endsWith('"')) ||
+    (v.startsWith("'") && v.endsWith("'"))
+  ) {
+    v = v.slice(1, -1);
+  }
+  return v;
+};
 
 const requiredEnvVars = [
   'DB_NAME',
@@ -29,6 +48,12 @@ if (process.env.NODE_ENV === 'production' || process.env.VALIDATE_ENV === 'true'
   validateEnvVars();
 }
 
+const dbHostRaw = envStr('DB_HOST') || '';
+const isRdsHost = dbHostRaw.includes('.rds.amazonaws.com');
+const sslExplicitOn = process.env.DB_SSL === 'true' || process.env.DB_SSL === '1';
+const sslExplicitOff = process.env.DB_SSL === 'false' || process.env.DB_SSL === '0';
+const useDbSsl = sslExplicitOn || (isRdsHost && !sslExplicitOff);
+
 export const config = {
   app: {
     name: process.env.APP_NAME || 'Custom API',
@@ -38,12 +63,24 @@ export const config = {
   },
   db: {
     enabled: process.env.DB_ENABLED !== 'false', // Por defecto habilitado, deshabilitar con DB_ENABLED=false
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
+    name: envStr('DB_NAME'),
+    user: envStr('DB_USER'),
+    password: envStr('DB_PASSWORD'),
+    host: envStr('DB_HOST'),
     port: Number(process.env.DB_PORT) || 5432,
     dialect: 'postgres',
+    /**
+     * TLS: explícito con DB_SSL=true, o automático si DB_HOST es RDS (*.rds.amazonaws.com).
+     * Desactivar en RDS: DB_SSL=false
+     */
+    ssl: useDbSsl
+      ? {
+          require: true,
+          rejectUnauthorized:
+            process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true' ||
+            process.env.DB_SSL_REJECT_UNAUTHORIZED === '1',
+        }
+      : undefined,
     pool: {
       acquire: Number(process.env.PG_POOL_ACQUIRE) || 60000,
       idle: Number(process.env.PG_POOL_IDLE) || 10000,
