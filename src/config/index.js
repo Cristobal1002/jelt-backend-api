@@ -54,12 +54,26 @@ const sslExplicitOn = process.env.DB_SSL === 'true' || process.env.DB_SSL === '1
 const sslExplicitOff = process.env.DB_SSL === 'false' || process.env.DB_SSL === '0';
 const useDbSsl = sslExplicitOn || (isRdsHost && !sslExplicitOff);
 
+/**
+ * Tras ALB/nginx: confía en X-Forwarded-* para que req.ip sea el cliente real (rate limit).
+ * TRUST_PROXY=0|false desactiva. En producción por defecto 1 salto si no se define.
+ */
+const trustProxyHops = (() => {
+  const raw = process.env.TRUST_PROXY;
+  if (raw === 'false' || raw === '0') return 0;
+  if (raw === 'true' || raw === '1') return 1;
+  const n = Number(raw);
+  if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+  return process.env.NODE_ENV === 'production' ? 1 : 0;
+})();
+
 export const config = {
   app: {
     name: process.env.APP_NAME || 'Custom API',
     port: Number(process.env.PORT) || 3000,
     nodeEnv: process.env.NODE_ENV || 'development',
     apiVersion: process.env.API_VERSION || 'v1',
+    trustProxyHops,
   },
   db: {
     enabled: process.env.DB_ENABLED !== 'false', // Por defecto habilitado, deshabilitar con DB_ENABLED=false

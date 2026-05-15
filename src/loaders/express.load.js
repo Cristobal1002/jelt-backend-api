@@ -11,14 +11,34 @@ import { responseHandler } from '../middlewares/index.js';
 import { errorHandlerMiddleware } from '../middlewares/index.js';
 import { swaggerOptions } from '../config/swagger.js';
 
+const corsOriginOption = () => {
+  const raw = config.cors.origin;
+  if (raw === '*') return true;
+  return String(raw)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
+
+/** Rutas que no deben consumir el contador global (login compartía IP del balanceador → 429). */
+const skipGlobalRateLimit = (req) => {
+  const path = (req.originalUrl || req.url || '').split('?')[0];
+  if (path.includes('/health')) return true;
+  return /\/auth\/(login|register|recover|login-temp)(\/|$)/.test(path);
+};
+
 export const loadExpress = (app) => {
+  if (config.app.trustProxyHops > 0) {
+    app.set('trust proxy', config.app.trustProxyHops);
+  }
+
   // Security headers
   app.use(helmet());
 
   // CORS
   app.use(
     cors({
-      origin: config.cors.origin === '*' ? true : config.cors.origin.split(','),
+      origin: corsOriginOption(),
       credentials: config.cors.credentials,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-app-token'],
@@ -64,7 +84,7 @@ export const loadExpress = (app) => {
     });
   }
 
-  // Rate limiting
+  // Rate limiting (auth público y health quedan fuera del contador global)
   const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
     max: config.rateLimit.max,
@@ -74,6 +94,7 @@ export const loadExpress = (app) => {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipGlobalRateLimit,
   });
   app.use('/api/', limiter);
 
@@ -89,9 +110,6 @@ export const loadExpress = (app) => {
     );
     next();
   });
-
-  // Response handler middleware
-  app.use(responseHandler);
 
   // Routes
   routes(app);
